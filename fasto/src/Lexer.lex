@@ -38,6 +38,8 @@
        | "char"         => Parser.CHAR pos
        | "fun"          => Parser.FUN pos
        | "not"         =>  Parser.NOT pos
+       | "true"         => Parser.TRUE pos
+       | "false"        => Parser.FALSE pos 
 
 (* specials: *)
        | "iota"         => Parser.IOTA pos
