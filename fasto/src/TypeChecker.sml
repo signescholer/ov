@@ -105,7 +105,12 @@ and checkExp ftab vtab (exp : In.Exp)
          in (Int,
              Out.Mult (e1_dec, e2_dec, pos))
          end
-       
+    | In.Divide (e1, e2, pos)
+      => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Int, e1, e2)
+         in (Int,
+             Out.Divide (e1_dec, e2_dec, pos))
+         end
+         
 | In.Negate (e1, pos)
       => let val (_, e1_dec) = checkUnOp ftab vtab (pos, Int, e1)
          in (Int,
