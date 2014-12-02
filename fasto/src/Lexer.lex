@@ -84,7 +84,7 @@ rule Token = parse
   | `/`                 { Parser.DIV   (getPos lexbuf) }
   | `&``&`              { Parser.AND   (getPos lexbuf) }
   | `|``|`              { Parser.OR   (getPos lexbuf) }
-  | `~`                 { Parser.NEG   (getPos lexbuf) }
+  | `~`                 { Parser.NEGATE   (getPos lexbuf) }
   | `-`                 { Parser.MINUS  (getPos lexbuf) }
   | "=="                { Parser.DEQ    (getPos lexbuf) }
   | `=`                 { Parser.EQ     (getPos lexbuf) }
