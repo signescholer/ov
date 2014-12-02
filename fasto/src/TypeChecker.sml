@@ -94,7 +94,13 @@ and checkExp ftab vtab (exp : In.Exp)
          in (Int,
              Out.Plus (e1_dec, e2_dec, pos))
          end
-
+         
+    | In.Mult (e1, e2, pos)
+      => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Int, e1, e2)
+         in (Int,
+             Out.Mult (e1_dec, e2_dec, pos))
+         end
+         
     | In.Minus (e1, e2, pos)
       => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Int, e1, e2)
          in (Int,
