@@ -94,6 +94,18 @@ and checkExp ftab vtab (exp : In.Exp)
               NONE   => raise Error (("Unknown variable " ^ s), pos)
             | SOME t => (t, Out.Var (s, pos)))
 
+    | In.And (e1, e2, pos)
+      => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Bool, e1, e2)
+         in (Bool,
+             Out.And (e1_dec, e2_dec, pos))
+         end
+
+    | In.Or (e1, e2, pos)
+      => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Bool, e1, e2)
+         in (Bool,
+             Out.Or (e1_dec, e2_dec, pos))
+         end
+						
     | In.Plus (e1, e2, pos)
       => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Int, e1, e2)
          in (Int,
