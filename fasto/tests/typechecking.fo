@@ -1,0 +1,2 @@
+fun int main() =
+  if (1 == 1) then 5 else 'c'
