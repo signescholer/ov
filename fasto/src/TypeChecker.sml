@@ -65,6 +65,11 @@ fun checkBinOp ftab vtab (pos, t, e1, e2) =
         val t = unifyTypes pos (t1, t2)
     in (t, e1', e2') end
 
+fun checkUnOp ftab vtab (pos, t, e1) =
+    let val (t, e1') = checkExp ftab vtab e1
+    in (t, e1') end
+
+
 (* Determine the type of an expression.  On the way, decorate each node in the
    syntax tree with inferred types.  An exception is raised immediately on the
    first type mismatch - this happens in "unifyTypes".  (It could instead
@@ -100,7 +105,13 @@ and checkExp ftab vtab (exp : In.Exp)
          in (Int,
              Out.Mult (e1_dec, e2_dec, pos))
          end
-         
+       
+| In.Negate (e1, pos)
+      => let val (_, e1_dec) = checkUnOp ftab vtab (pos, Int, e1)
+         in (Int,
+             Out.Negate (e1_dec, pos))
+         end
+  
     | In.Minus (e1, e2, pos)
       => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Int, e1, e2)
          in (Int,
