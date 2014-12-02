@@ -73,6 +73,7 @@ functor FastoFn (T : sig eqtype TypeAnnot end) = struct
     | ArrayLit of Exp list * T.TypeAnnot * pos
     | Var of string * pos
     | Plus of Exp * Exp * pos
+    | Mult of Exp * Exp * pos
     | Minus of Exp * Exp * pos
     | Equal of Exp * Exp * pos
     | Less of Exp * Exp * pos
@@ -146,6 +147,8 @@ functor FastoFn (T : sig eqtype TypeAnnot end) = struct
         concat [ "{ ", String.concatWith ", " (map (ppExp d) es), " }" ]
     | ppExp d (Var (id, pos)) = id
     | ppExp d (Plus (e1, e2, pos))  =
+        concat [ "(", ppExp d e1, " + ", ppExp d e2, ")" ]
+    | ppExp d (Mult (e1, e2, pos))  =
         concat [ "(", ppExp d e1, " + ", ppExp d e2, ")" ]
     | ppExp d (Minus (e1, e2, pos)) =
         concat [ "(", ppExp d e1, " - ", ppExp d e2, ")" ]
