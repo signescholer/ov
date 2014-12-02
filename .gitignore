@@ -1,6 +1,6 @@
 fasto/bin/
-fasto/scr/*.ui
-fasto/scr/*.uo
-fasto/scr/*.sig
-fasto/scr/*.sml
-!fasto/src/Fasto.sml
+fasto/src/*.ui
+fasto/src/*.uo
+fasto/src/*.sig
+fasto/src/Parser.sml
+fasto/src/Lexer.sml
