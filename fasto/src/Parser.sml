@@ -69,7 +69,7 @@ datatype token =
   | MAP of t__24__
   | MINUS of t__25__
   | MULT of t__26__
-  | NEG of t__27__
+  | NEGATE of t__27__
   | NOT of t__28__
   | NUM of t__29__
   | OP of t__30__
@@ -125,7 +125,7 @@ val yytransl = #[
   280 (* MAP *),
   281 (* MINUS *),
   282 (* MULT *),
-  283 (* NEG *),
+  283 (* NEGATE *),
   284 (* NOT *),
   285 (* NUM *),
   286 (* OP *),
@@ -591,7 +591,7 @@ val d__1__ = peekVal 2 : Fasto.UnknownTypes.Exp
 val d__2__ = peekVal 1 : (int*int)
 val d__3__ = peekVal 0 : Fasto.UnknownTypes.Exp
 in
-( Neg ((d__1__), (d__2__)) ) end : Fasto.UnknownTypes.Exp))
+( Negate ((d__1__), (d__2__)) ) end : Fasto.UnknownTypes.Exp))
 ;
 (* Rule 23, file Parser.grm, line 86 *)
 val _ = update_ yyact 23
