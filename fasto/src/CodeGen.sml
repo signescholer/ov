@@ -233,6 +233,30 @@ structure CodeGen = struct
             val code2 = compileExp e2 vtable t2
         in  code1 @ code2 @ [Mips.SUB (place,t1,t2)]
         end
+    | And (e1, e2, pos) =>
+        let val t1 = newName "and_L"
+            val t2 = newName "and_R"
+            val code1 = compileExp e1 vtable t1
+            val code2 = compileExp e2 vtable t2
+        in code1 @ code2 @ [Mips.AND (place,t1,t2)]
+        end
+    | Or (e1, e2, pos) =>
+        let val t1 = newName "or_L"
+            val t2 = newName "or_R"
+            val code1 = compileExp e1 vtable t1
+            val code2 = compileExp e2 vtable t2
+        in code1 @ code2 @ [Mips.OR (place,t1,t2)]
+        end
+    | Not (e, pos) =>
+        let val t = newName "not_"
+            val code = compileExp e vtable t
+        in code @ [Mips.XORI (place,t,"1")]
+        end
+    | Negate (e, pos) =>
+        let val t = newName "Negate_"
+            val code = compileExp e vtable t
+        in code @ [Mips.SUB (place,"0",t)]
+        end
     | Let (dec, e1, (line, col)) =>
         let val (code1, vtable1) = compileDec dec vtable
             val code2 = compileExp e1 vtable1 place
