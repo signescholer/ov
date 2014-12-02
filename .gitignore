@@ -1,1 +1,6 @@
 fasto/bin/
+fasto/scr/*.ui
+fasto/scr/*.uo
+fasto/scr/*.sig
+fasto/scr/*.sml
+!fasto/src/Fasto.sml
