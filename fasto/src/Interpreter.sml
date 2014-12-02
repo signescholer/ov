@@ -87,6 +87,16 @@ fun evalBinopNum ( bop, IntVal n1, IntVal n2, pos ) =
   | evalBinopNum ( bop, e1, e2, pos ) =
     invalidOperands [(Int, Int)] e1 e2 pos
 
+fun evalUnopNum ( uop, IntVal n, pos ) =
+    IntVal (uop(n))
+  | evalUnopNum ( uop, e, pos ) =
+    invalidOperand Int e pos
+
+fun evalUnopBool ( uop, BoolVal n, pos ) =
+    BoolVal (uop(n))
+  | evalUnopBool ( uop, e, pos ) =
+    invalidOperand Bool e pos
+    
 fun evalEq ( IntVal n1,     IntVal n2,     pos ) =
     BoolVal (n1=n2)
   | evalEq ( BoolVal b1,     BoolVal b2,     pos ) =
@@ -170,6 +180,16 @@ fun evalExp ( Constant (v,_), vtab, ftab ) = v
            | SOME m => m
         end
 
+  | evalExp ( Not(e, pos), vtab, ftab ) =
+        let val res   = evalExp(e, vtab, ftab)
+        in  evalUnopBool(not, res, pos)
+        end
+
+  | evalExp ( Negate(e, pos), vtab, ftab ) =
+        let val res   = evalExp(e, vtab, ftab)
+        in  evalUnopNum(op ~, res, pos)
+        end
+
   | evalExp ( Plus(e1, e2, pos), vtab, ftab ) =
         let val res1   = evalExp(e1, vtab, ftab)
             val res2   = evalExp(e2, vtab, ftab)
@@ -180,6 +200,18 @@ fun evalExp ( Constant (v,_), vtab, ftab ) = v
         let val res1   = evalExp(e1, vtab, ftab)
             val res2   = evalExp(e2, vtab, ftab)
         in  evalBinopNum(op -, res1, res2, pos)
+        end
+        
+  | evalExp ( Mult(e1, e2, pos), vtab, ftab ) =
+        let val res1   = evalExp(e1, vtab, ftab)
+            val res2   = evalExp(e2, vtab, ftab)
+        in  evalBinopNum(op *, res1, res2, pos)
+        end
+
+  | evalExp ( Divide(e1, e2, pos), vtab, ftab ) =
+        let val res1   = evalExp(e1, vtab, ftab)
+            val res2   = evalExp(e2, vtab, ftab)
+        in  evalBinopNum(op int.quot, res1, res2, pos)
         end
 
   | evalExp ( Equal(e1, e2, pos), vtab, ftab ) =
