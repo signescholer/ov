@@ -65,7 +65,7 @@ fun checkBinOp ftab vtab (pos, t, e1, e2) =
         val t = unifyTypes pos (t1, t2)
     in (t, e1', e2') end
 
-fun checkUnOp ftab vtab (pos, t, e1) =
+and checkUnOp ftab vtab (pos, t, e1) =
     let val (t, e1') = checkExp ftab vtab e1
     in (t, e1') end
 
