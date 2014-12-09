@@ -167,7 +167,11 @@ structure CodeGen = struct
           [ Mips.LUI (place, makeConst (n div 65536))
           , Mips.ORI (place, place, makeConst (n mod 65536)) ]
     | Constant (CharVal c, pos) => [ Mips.LI (place, makeConst (ord c)) ]
-
+    | Constant (BoolVal b, pos) => 
+        (case b of
+            true    => [ Mips.LI (place,Int.toString(1)) ]
+          | false   => [ Mips.LI (place,Int.toString(0)) ]
+        )
     (* Create/return a label here, collect all string literals of the program
        (in stringTable), and create them in the data section before the heap
        (Mips.ASCIIZ) *)
