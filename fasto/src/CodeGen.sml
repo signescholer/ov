@@ -169,8 +169,8 @@ structure CodeGen = struct
     | Constant (CharVal c, pos) => [ Mips.LI (place, makeConst (ord c)) ]
     | Constant (BoolVal b, pos) => 
         (case b of
-            true    => [ Mips.LI (place,Int.toString(1)) ]
-          | false   => [ Mips.LI (place,Int.toString(0)) ]
+            true    => [ Mips.LI (place,"1") ]
+          | false   => [ Mips.LI (place,"0") ]
         )
     (* Create/return a label here, collect all string literals of the program
        (in stringTable), and create them in the data section before the heap
@@ -251,13 +251,17 @@ structure CodeGen = struct
             val code2 = compileExp e2 vtable t2
         in  code1 @ code2 @ [Mips.DIV (place,t1,t2)]
         end
-    | And (e1, e2, pos) =>
-        let val t1 = newName "and_L"
+ (*   | And (e1, e2, pos) =>
+        let 
+            val t1 = newName "and_L"
             val t2 = newName "and_R"
             val code1 = compileExp e1 vtable t1
             val code2 = compileExp e2 vtable t2
         in code1 @ code2 @ [Mips.AND (place,t1,t2)]
         end
+
+        
+
     | Or (e1, e2, pos) =>
         let val t1 = newName "or_L"
             val t2 = newName "or_R"
@@ -265,6 +269,44 @@ structure CodeGen = struct
             val code2 = compileExp e2 vtable t2
         in code1 @ code2 @ [Mips.OR (place,t1,t2)]
         end
+        
+*)
+(*
+        result_reg = checkexp1
+        beq result_reg,$0,end
+        result_reg = checkexp2
+        end
+
+
+  and compileCond c vtable tlab flab =
+    let val t1 = newName "cond"
+        val code1 = compileExp c vtable t1
+    in  code1 @ [Mips.BNE (t1, "0", tlab), Mips.J flab]
+    end
+
+Her er de grimme versioner:        
+*)
+    
+    | And (e1, e2, pos) =>
+        let val thenLabel = newName "andthen"
+            val elseLabel = newName "andelse"
+            val endLabel = newName "andend"
+            val code1 = compileCond e1 vtable thenLabel elseLabel
+            val code2 = compileExp e2 vtable place
+        in code1 @ [Mips.LABEL thenLabel] @ code2  @
+           [ Mips.J endLabel, Mips.LABEL elseLabel, Mips.LI (place,"0"), Mips.LABEL endLabel]
+        end
+
+    | Or (e1, e2, pos) =>
+        let val thenLabel = newName "orthen"
+            val elseLabel = newName "orelse"
+            val endLabel = newName "orend"
+            val code1 = compileCond e1 vtable thenLabel elseLabel
+            val code2 = compileExp e2 vtable place
+        in code1 @ [Mips.LABEL thenLabel,Mips.LI (place,"1")]  @
+           [ Mips.J endLabel, Mips.LABEL elseLabel] @ code2 @ [Mips.LABEL endLabel]
+        end
+        
     | Not (e, pos) =>
         let val t = newName "not_"
             val code = compileExp e vtable t
@@ -609,6 +651,8 @@ structure CodeGen = struct
            @ loop_footer
         end
 
+(*PUT FILTER HERE*)
+    
     (* reduce(f, acc, {x1, x2, ...}) = f(..., f(x2, f(x1, acc))) *)
     | Reduce (binop, acc_exp, arr_exp, tp, pos) =>
         let val arr_reg  = newName "arr_reg"   (* address of array *)
@@ -651,9 +695,9 @@ structure CodeGen = struct
            , Mips.LABEL loop_end ]
         end
 
-  (* TODO TASK 1: add case for constant booleans (True/False). *)
+  (* DONE TODO TASK 1: add case for constant booleans (True/False). *)
 
-  (* TODO TASK 1: add cases for Times, Divide, Negate, Not, And, Or.  Look at
+  (* DONE TODO TASK 1: add cases for Times, Divide, Negate, Not, And, Or.  Look at
   how Plus and Minus are implemented for inspiration.  Remember that
   And and Or are short-circuiting - look at If to see how that could
   be handled (or your textbook).
