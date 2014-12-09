@@ -664,13 +664,14 @@ Her er de grimme versioner:
         let val size_reg = newName "size_reg" (* size of input array *)
             val arr_reg  = newName "arr_reg" (* address of array *)
             val elem_reg = newName "elem_reg" (* address of single element *)
-            val res_reg = newName "res_reg" (* vi TROR at det er adressen på resultat-arrayet*) 
+            val res_reg = newName "res_reg" (* værdi fra input arr og resultat af funktionen *) 
             val arr_code = compileExp arr_exp vtable arr_reg
 
             val get_size = [ Mips.LW (size_reg, arr_reg, "0") ]
 
             val addr_reg = newName "addr_reg" (* address of element in new array *)
             val i_reg = newName "i_reg"
+            val jl = newName "zc"
             val init_regs = [ Mips.ADDI (addr_reg, place, "4")
                             , Mips.MOVE (i_reg, "0")
                             , Mips.ADDI (elem_reg, arr_reg, "4") ]
@@ -690,25 +691,27 @@ Her er de grimme versioner:
                 
             val loop_map0 =
                 let val crlabel = newName "cond_result"
+                    val code0 = Mips.LB(res_reg, elem_reg, "0")
                     val code1 = applyFunArg(farg, [res_reg], vtable, crlabel, pos)
                     val dontCopyLabel = newName "increment"
                     val loopendshere = newName "loopend"
+                    
                     val copycode = case getElemSize elem_type of
-                                    One => [ Mips.LB(res_reg, elem_reg, "0") ]
-                                           @ [ Mips.ADDI(res_reg, res_reg, "1") ]
-                                  | Four => [ Mips.LW(res_reg, elem_reg, "0") ]
-                                            @ [ Mips.ADDI(res_reg, res_reg, "4") ]
+                                    One => [ Mips.SB(res_reg, addr_reg, "0") ]
+                                           @ [ Mips.ADDI(addr_reg, addr_reg, "1"), Mips.ADDI(jl,jl,"1")]
+                                  | Four => [ Mips.SW(res_reg, addr_reg, "0") ]
+                                            @ [ Mips.ADDI(addr_reg, addr_reg, "4") , Mips.ADDI(jl,jl,"1") ]
                     val incrementcode = case getElemSize elem_type of
                                         One => Mips.ADDI (elem_reg, elem_reg, "1")
                                       | Four => Mips.ADDI (elem_reg, elem_reg, "4")
                 in    
-                    code1 @ [Mips.BEQ (crlabel,"0",dontCopyLabel)] @ copycode @ [Mips.LABEL dontCopyLabel,incrementcode,Mips.LABEL loopendshere]
-                (*FIXME: Tæl resultaterne og juster størrelsen på arrayet. *)
+                    code0 :: code1 @ [Mips.BEQ (crlabel,"0",dontCopyLabel)] @ copycode @ [Mips.LABEL dontCopyLabel,incrementcode,Mips.LABEL loopendshere]
                 end
-                  
+            val write_new_size =
+                [ Mips.SW (jl,place,"0") ]
             val loop_footer =
-                [ Mips.ADDI (addr_reg, addr_reg, makeConst (elemSizeToInt (getElemSize elem_type)))
-                , Mips.ADDI (i_reg, i_reg, "1")
+                [ 
+                 Mips.ADDI (i_reg, i_reg, "1")
                 , Mips.J loop_beg
                 , Mips.LABEL loop_end
                 ]
@@ -719,6 +722,7 @@ Her er de grimme versioner:
            @ loop_header
            @ loop_map0
            @ loop_footer
+           @ write_new_size
         end
 
     
