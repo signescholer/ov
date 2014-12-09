@@ -254,7 +254,7 @@ and checkExp ftab vtab (exp : In.Exp)
                    raise Error ("Filter: incompatible function type of "
                                 ^ In.ppFunArg 0 f ^ ":" ^ showFunType (args, res), pos)
          in if elem_type = f_arg_type
-            then (Array f_res_type,
+            then (Array f_arg_type,
            (*       Out.Filter (f', arr_exp_dec, elem_type, f_res_type, pos))   *)		   
                     Out.Filter (f', arr_exp_dec, elem_type, pos))
             else raise Error ("Filter: array element types does not match."

@@ -691,7 +691,8 @@ Her er de grimme versioner:
             val loop_map0 =
                 let val crlabel = newName "cond_result"
                     val code1 = applyFunArg(farg, [res_reg], vtable, crlabel, pos)
-                    val dontCopyLabel = newName "filterdontcopy"
+                    val dontCopyLabel = newName "increment"
+                    val loopendshere = newName "loopend"
                     val copycode = case getElemSize elem_type of
                                     One => [ Mips.LB(res_reg, elem_reg, "0") ]
                                            @ [ Mips.ADDI(res_reg, res_reg, "1") ]
@@ -701,8 +702,8 @@ Her er de grimme versioner:
                                         One => Mips.ADDI (elem_reg, elem_reg, "1")
                                       | Four => Mips.ADDI (elem_reg, elem_reg, "4")
                 in    
-                    code1 @ [Mips.BEQ (crlabel,"0",dontCopyLabel)] @ copycode @ [Mips.LABEL dontCopyLabel,incrementcode]
-                (*FIXEM: Tæl resultaterne og juster størrelsen på arrayet. *)
+                    code1 @ [Mips.BEQ (crlabel,"0",dontCopyLabel)] @ copycode @ [Mips.LABEL dontCopyLabel,incrementcode,Mips.LABEL loopendshere]
+                (*FIXME: Tæl resultaterne og juster størrelsen på arrayet. *)
                 end
                   
             val loop_footer =
