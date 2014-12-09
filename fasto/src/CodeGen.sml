@@ -650,8 +650,110 @@ Her er de grimme versioner:
            @ loop_map1
            @ loop_footer
         end
+    
+        | Filter (farg, arr_exp, elem_type, pos) =>
+    
+      (* TODO: TASK 2: Add case for Filter.
+         Start by allocating an array of the same size as the input array.  Then,
+         for each element in the input array, if the predicate function is true
+         copy it to the result array.  Finally, fix the length-field at the end,
+         once you know how many elements that are actually left. Do not worry
+         about wasted space. *)
+         
+        let val size_reg = newName "size_reg" (* size of input array *)
+            val arr_reg  = newName "arr_reg" (* address of array *)
+            val elem_reg = newName "elem_reg" (* address of single element *)
+            val res_reg = newName "res_reg"
+            val arr_code = compileExp arr_exp vtable arr_reg
 
-(*PUT FILTER HERE*)
+            val get_size = [ Mips.LW (size_reg, arr_reg, "0") ]
+
+            val addr_reg = newName "addr_reg" (* address of element in new array *)
+            val i_reg = newName "i_reg"
+            val init_regs = [ Mips.ADDI (addr_reg, place, "4")
+                            , Mips.MOVE (i_reg, "0")
+                            , Mips.ADDI (elem_reg, arr_reg, "4") ]
+
+            val loop_beg = newName "loop_beg"
+            val loop_end = newName "loop_end"
+            val tmp_reg = newName "tmp_reg"
+            val loop_header = [ Mips.LABEL (loop_beg)
+                              , Mips.SUB (tmp_reg, i_reg, size_reg)
+                              , Mips.BGEZ (tmp_reg, loop_end) ]
+
+            (* map is 'arr[i] = f(old_arr[i])'. *)
+            (* 
+            val loop_map0 =
+                case getElemSize elem_type of
+                    One => Mips.LB(res_reg, elem_reg, "0")
+                           :: applyFunArg(farg, [res_reg], vtable, res_reg, pos)
+                           @ [ Mips.ADDI(elem_reg, elem_reg, "1") ]
+                  | Four => Mips.LW(res_reg, elem_reg, "0")
+                            :: applyFunArg(farg, [res_reg], vtable, res_reg, pos)
+                           @ [ Mips.ADDI(elem_reg, elem_reg, "4") ]
+            *)
+
+
+  (* and compileCond c vtable tlab flab =
+    let val t1 = newName "cond"
+        val code1 = compileExp c vtable t1
+    in  code1 @ [Mips.BNE (t1, "0", tlab), Mips.J flab]
+    end *)
+                (*
+                    cond
+                    beq cond,$0,dontcopy
+                    [copy code here]
+                    j end
+                    dontcopy:
+                    [dontcopy code here]
+                    end:
+                *)
+                
+            val loop_map0 =
+                let val crlabel = newName "cond_result"
+                    val code1 = applyFunArg(farg, [res_reg], vtable, crlabel, pos)
+                    (*   and applyFunArg (FunName s, args, vtable, place, pos) : Mips.Prog = *)
+                    val CopyLabel = newName "filtercopy"
+                    val DontLabel = newName "filterdontcopy"
+                    val endLabel = newName "end"
+                in
+
+
+            if 
+                        (get the result) == 1
+                    then
+                        case getElemSize elem_type of
+                            One => Mips.LB(res_reg, elem_reg, "0")
+                                :: applyFunArg(farg, [res_reg], vtable, res_reg, pos)
+                                @ [ Mips.ADDI(elem_reg, elem_reg, "1") ]
+                        | Four => Mips.LW(res_reg, elem_reg, "0")
+                                :: applyFunArg(farg, [res_reg], vtable, res_reg, pos)
+                                @ [ Mips.ADDI(elem_reg, elem_reg, "4") ]
+                    else
+                        
+                        [ Mips.ADDI(elem_reg, elem_reg, "0") ]
+
+            val loop_map1 =
+                case getElemSize ret_type of
+                    One => [ Mips.SB (res_reg, addr_reg, "0") ]
+                  | Four => [ Mips.SW (res_reg, addr_reg, "0") ]
+
+            val loop_footer =
+                [ Mips.ADDI (addr_reg, addr_reg, makeConst (elemSizeToInt (getElemSize ret_type)))
+                , Mips.ADDI (i_reg, i_reg, "1")
+                , Mips.J loop_beg
+                , Mips.LABEL loop_end
+                ]
+        in arr_code
+           @ get_size
+           @ dynalloc (size_reg, place, ret_type)
+           @ init_regs
+           @ loop_header
+           @ loop_map0
+           @ loop_map1
+           @ loop_footer
+        end
+
     
     (* reduce(f, acc, {x1, x2, ...}) = f(..., f(x2, f(x1, acc))) *)
     | Reduce (binop, acc_exp, arr_exp, tp, pos) =>
