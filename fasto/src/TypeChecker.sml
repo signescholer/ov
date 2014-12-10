@@ -315,12 +315,21 @@ and checkExp ftab vtab (exp : In.Exp)
                         ", expected " ^ ppType f_arg_type, pos)
          in if elem_type = f_arg_type
             then if elem_type = n_type
-                 then (elem_type,
+                 then (Array elem_type,
                        Out.Scan (f', n_dec, arr_dec, elem_type, pos))
                  else raise (err ("neutral element", n_type))
             else raise err ("array element", elem_type)
          end
 
+		  (*  then (Array f_res_type,
+                  Out.Map (f', arr_exp_dec, elem_type, f_res_type, pos))
+            else raise Error ("Map: array element types does not match."
+                              ^ ppType elem_type ^ " instead of "
+                              ^ ppType f_arg_type , pos)
+ 
+		 *)
+		 
+		 
      | In.Replicate (n_exp, exp, t, pos)
       => let val (n_type, n_dec) = checkExp ftab vtab n_exp
              val (exp_t, exp_dec) = checkExp ftab vtab exp
