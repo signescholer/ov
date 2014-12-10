@@ -119,8 +119,8 @@ Exp :     NUM            { Constant (IntVal (#1 $1), #2 $1) }
         | FALSE         { False $1 }
 		| FILTER LPAR FunArg COMMA Exp RPAR
                         { Filter ($3, $5, (), $1) }
-		| SCAN LPAR OP BinOp COMMA Exp COMMA Exp RPAR
-                        { Scan ($4, $6, $8, (), $1) }	
+        | SCAN LPAR FunArg COMMA Exp COMMA Exp RPAR
+                        { Scan ($3, $5, $7, (), $1) }						
 ;
 
 Exps : Exp COMMA Exps   { $1 :: $3 }
