@@ -726,6 +726,7 @@ Her er de grimme versioner:
         end
 
     (* Scan(f, acc, {x1, x2, ...}) = {e,f(e,x1),f(f(e,x1),x2)...} *)
+    (* Vi prøver lige at få de andre med. *)
     | Scan (farg, acc_exp, arr_exp, tp, pos) =>
         let val size_reg = newName "size_reg" (* size of input array *)
             val size_reg = newName "size_reg" (* size of output array *)
