@@ -768,7 +768,7 @@ Her er de grimme versioner:
            , Mips.LABEL loop_end ]
         end
 
-	| Scan (binop, acc_exp, arr_exp, tp, pos) =>
+	| Scan (farg, acc_exp, arr_exp, tp, pos) =>
         let val arr_reg  = newName "arr_reg"   (* address of array *)
             val size_reg = newName "size_reg"  (* size of input array *)
             val i_reg    = newName "ind_var"   (* loop counter *)
@@ -779,7 +779,8 @@ Her er de grimme versioner:
 			val get_size = [ Mips.LW (size_reg, arr_reg, "0") ]   (*NYT*)
 			val addr_reg = newName "addr_reg" (* address of element in new array *)
             val res_reg = newName "res_reg" (* værdi fra input arr og resultat af funktionen *) 
-		    
+
+			
 			val init_regs = [ Mips.ADDI (addr_reg, place, "4")
                             , Mips.MOVE (i_reg, "0")
                             , Mips.ADDI (elem_reg, arr_reg, "4") ]
@@ -793,7 +794,7 @@ Her er de grimme versioner:
             (* Set arr_reg to address of first element instead. *)
             (* Set i_reg to 0. While i < size_reg, loop. *)
 			
-			val code0 = Mips.LB(res_reg, elem_reg, "0")
+			val code0 = [Mips.LB(res_reg, elem_reg, "0")]
     		
 			val loop_code =
                 [ Mips.ADDI(arr_reg, arr_reg, "4")
@@ -814,15 +815,14 @@ Her er de grimme versioner:
                case getElemSize tp of
                     One => Mips.LB(res_reg, elem_reg, "0")
                             (*:: applyFunArg(farg, [res_reg], vtable, res_reg, pos) *)
-							::	 applyFunArg(binop, [place, tmp_reg], vtable, place, pos)
-                           @ [ Mips.ADDI(elem_reg, elem_reg, "1") ]
+							::	 applyFunArg(farg, [place, tmp_reg], vtable, place, pos)
+                           @ [ Mips.ADDI(elem_reg, elem_reg, "1")]
                   | Four => Mips.LW(res_reg, elem_reg, "0")
                            (* :: applyFunArg(farg, [res_reg], vtable, res_reg, pos) *)
-							::	 applyFunArg(binop, [place, tmp_reg], vtable, place, pos)
-                            @ [ Mips.ADDI(elem_reg, elem_reg, "4") ]
-							
-			
-        in arr_code @ get_size @ header1 @ acc_code @ loop_code @ load_code @ apply_code @
+							::	 applyFunArg(farg, [place, tmp_reg], vtable, place, pos)
+                            @ [ Mips.ADDI(elem_reg, elem_reg, "4")]
+				
+        in arr_code @ init_regs @ code0 @ get_size @ header1 @ acc_code @ loop_code @ load_code @ apply_code @
            [ Mips.ADDI(i_reg, i_reg, "1")
            , Mips.J loop_beg
            , Mips.LABEL loop_end ]
