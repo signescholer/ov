@@ -734,10 +734,7 @@ Her er de grimme versioner:
             val res_reg = newName "res_reg" (* værdi fra input arr og resultat af funktionen *)
             val e_reg = newName "e_reg" (* vores udregnede værdi der skal bruges i næste iteration*)
             val arr_code = compileExp arr_exp vtable arr_reg    (* her bliver det nye array lavet og sat ind på arr_reg *)
-            
-            
-
-            val acc_code = compileExp acc_exp vtable e_reg
+            val acc_code = compileExp acc_exp vtable e_reg      (* her udregner vi vores første e *)
             
             val get_size = [ Mips.LW (size_reg, arr_reg, "0"),
                              Mips.ADDI(size_reg,size_reg,"1") ] (* fordi det nye array er et element længere. *)
