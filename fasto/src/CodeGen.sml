@@ -697,7 +697,7 @@ Her er de grimme versioner:
                     val code0 = case getElemSize elem_type of
                                     One => [ Mips.LB(res_reg, elem_reg, "0") ]
                                  | Four => [ Mips.LW(res_reg, elem_reg, "0") ]
-(*FIXME Den skal ikke køre LB, men tjekke størrelsen af elementet og brug LB eller LW... tror jeg. *)
+
                     val code1 = applyFunArg(farg, [res_reg], vtable, crlabel, pos)
                     val dontCopyLabel = newName "increment"
                     
@@ -731,7 +731,6 @@ Her er de grimme versioner:
         end
 
     (* Scan(f, acc, {x1, x2, ...}) = {e,f(e,x1),f(f(e,x1),x2)...} *)
-    (* Vi prøver lige at få de andre med. *)
     | Scan (farg, acc_exp, arr_exp, tp, pos) =>
         let val size_reg = newName "size_reg" (* size of input array *)
             val size_reg = newName "size_reg" (* size of output array *)
@@ -739,7 +738,7 @@ Her er de grimme versioner:
             val elem_reg = newName "elem_reg" (* address of single element *)
             val res_reg = newName "res_reg" (* værdi fra input arr og resultat af funktionen *)
             val e_reg = newName "e_reg" (* vores udregnede værdi der skal bruges i næste iteration*)
-            val arr_code = compileExp arr_exp vtable arr_reg    (* her bliver det nye array lavet og sat ind på arr_reg *)
+            val arr_code = compileExp arr_exp vtable arr_reg    (* her compilere vi den expression der laver vores gamle array. arr_reg er pointer til starten *)
             val acc_code = compileExp acc_exp vtable e_reg      (* her udregner vi vores første e *)
             
             val get_size = [ Mips.LW (size_reg, arr_reg, "0"),
@@ -867,14 +866,14 @@ Her er de grimme versioner:
   be handled (or your textbook).
    *)
 
-  (* TODO: TASK 2: Add case for Scan.
+  (* DONE TODO: TASK 2: Add case for Scan.
 
      This can be implemented as sort of a mix between map and reduce.  Start
      by allocating an array of the same size as the input array, then fill it
      by iterating through the input array, calling the given function with the
      accumulator and the current element. *)
 
-  (* TODO: TASK 2: Add case for Filter.
+  (* DONE TODO: TASK 2: Add case for Filter.
 
      Start by allocating an array of the same size as the input array.  Then,
      for each element in the input array, if the predicate function is true
