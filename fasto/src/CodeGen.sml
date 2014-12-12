@@ -127,6 +127,9 @@ structure CodeGen = struct
                    , Mips.SLL (tmp_reg, tmp_reg, "2") ]
               else [ Mips.SLL (tmp_reg, size_reg, "2") ]
 
+(* Hvad er det nu for en melodi? *)              
+(* Først den ene vej! Og så den anden vej! Og shift! Og shift! Og mult og div! *)
+
           (* Make space for array size (+4). Increase HP. *)
           (* Save size of allocation in header. *)
           val code3 =
@@ -671,7 +674,7 @@ Her er de grimme versioner:
 
             val addr_reg = newName "addr_reg" (* address of element in new array *)
             val i_reg = newName "i_reg"
-            val jl = newName "zc"
+            val new_counter = newName "zc"
             val init_regs = [ Mips.ADDI (addr_reg, place, "4")
                             , Mips.MOVE (i_reg, "0")
                             , Mips.ADDI (elem_reg, arr_reg, "4") ]
@@ -692,23 +695,23 @@ Her er de grimme versioner:
             val loop_map0 =
                 let val crlabel = newName "cond_result"
                     val code0 = Mips.LB(res_reg, elem_reg, "0")
+(*FIXME Den skal ikke køre LB, men tjekke størrelsen af elementet og brug LB eller LW... tror jeg. *)
                     val code1 = applyFunArg(farg, [res_reg], vtable, crlabel, pos)
                     val dontCopyLabel = newName "increment"
-                    val loopendshere = newName "loopend"
                     
                     val copycode = case getElemSize elem_type of
                                     One => [ Mips.SB(res_reg, addr_reg, "0") ]
-                                           @ [ Mips.ADDI(addr_reg, addr_reg, "1"), Mips.ADDI(jl,jl,"1")]
+                                           @ [ Mips.ADDI(addr_reg, addr_reg, "1"), Mips.ADDI(new_counter,new_counter,"1")]
                                   | Four => [ Mips.SW(res_reg, addr_reg, "0") ]
-                                            @ [ Mips.ADDI(addr_reg, addr_reg, "4") , Mips.ADDI(jl,jl,"1") ]
+                                            @ [ Mips.ADDI(addr_reg, addr_reg, "4") , Mips.ADDI(new_counter,new_counter,"1") ]
                     val incrementcode = case getElemSize elem_type of
                                         One => Mips.ADDI (elem_reg, elem_reg, "1")
                                       | Four => Mips.ADDI (elem_reg, elem_reg, "4")
                 in    
-                    code0 :: code1 @ [Mips.BEQ (crlabel,"0",dontCopyLabel)] @ copycode @ [Mips.LABEL dontCopyLabel,incrementcode,Mips.LABEL loopendshere]
+                    code0 :: code1 @ [Mips.BEQ (crlabel,"0",dontCopyLabel)] @ copycode @ [Mips.LABEL dontCopyLabel,incrementcode]
                 end
             val write_new_size =
-                [ Mips.SW (jl,place,"0") ]
+                [ Mips.SW (new_counter,place,"0") ]
             val loop_footer =
                 [ 
                  Mips.ADDI (i_reg, i_reg, "1")
