@@ -188,7 +188,7 @@ structure CodeGen = struct
            Mips.COMMENT (label^": string \""^ String.toCString strLit ^ "\"") ]
       end
 
-    | Constant (ArrayVal (vs, tp), pos) =>
+    | Constant (ArrayVal (vs, tp), pos) => (* (([1,2,3,4,5], int), (43,12)) *)
       (* Create corresponding ArrayLit expression to re-use code. *)
       let val arraylit =
               ArrayLit (map (fn v => Constant (v, pos)) vs, tp, pos)
@@ -694,7 +694,9 @@ Her er de grimme versioner:
                 
             val loop_map0 =
                 let val crlabel = newName "cond_result"
-                    val code0 = Mips.LB(res_reg, elem_reg, "0")
+                    val code0 = case getElemSize elem_type of
+                                    One => [ Mips.LB(res_reg, elem_reg, "0") ]
+                                 | Four => [ Mips.LW(res_reg, elem_reg, "0") ]
 (*FIXME Den skal ikke køre LB, men tjekke størrelsen af elementet og brug LB eller LW... tror jeg. *)
                     val code1 = applyFunArg(farg, [res_reg], vtable, crlabel, pos)
                     val dontCopyLabel = newName "increment"
@@ -708,7 +710,7 @@ Her er de grimme versioner:
                                         One => Mips.ADDI (elem_reg, elem_reg, "1")
                                       | Four => Mips.ADDI (elem_reg, elem_reg, "4")
                 in    
-                    code0 :: code1 @ [Mips.BEQ (crlabel,"0",dontCopyLabel)] @ copycode @ [Mips.LABEL dontCopyLabel,incrementcode]
+                    code0 @ code1 @ [Mips.BEQ (crlabel,"0",dontCopyLabel)] @ copycode @ [Mips.LABEL dontCopyLabel,incrementcode]
                 end
             val write_new_size =
                 [ Mips.SW (new_counter,place,"0") ]
