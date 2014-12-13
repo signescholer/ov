@@ -12,7 +12,7 @@ open Fasto.UnknownTypes
 %token <string*(int*int)> ID STRINGLIT
 %token <int*(int*int)> NUM
 %token <char*(int*int)> CHARLIT
-%token <(int*int)> PLUS MINUS DEQ EQ LTH MULT DIV
+%token <(int*int)> PLUS MINUS DEQ EQ FNEQ LTH MULT DIV 
 %token <(int*int)> AND OR NOT NEGATE
 %token <(int*int)> LPAR RPAR LBRACKET RBRACKET LCURLY RCURLY
 %token <(int*int)> COMMA
@@ -128,4 +128,6 @@ Exps : Exp COMMA Exps   { $1 :: $3 }
 ;
 
 FunArg : ID { FunName (#1 $1) }
+       | FN Type LPAR Params RPAR FNEQ Exp
+       { Lambda ($2, $4, $7, $1) }
 ;
