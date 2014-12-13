@@ -2,5 +2,6 @@ fasto/bin/
 fasto/src/*.ui
 fasto/src/*.uo
 fasto/src/*.sig
+fasto/src/make
 fasto/src/Parser.sml
 fasto/src/Lexer.sml
