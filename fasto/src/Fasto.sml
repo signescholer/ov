@@ -70,8 +70,6 @@ functor FastoFn (T : sig eqtype TypeAnnot end) = struct
   datatype Exp =
       Constant of Value * pos
     | StringLit of string * pos
-    | True of pos
-    | False of pos
     | ArrayLit of Exp list * T.TypeAnnot * pos
     | Var of string * pos
     | Plus of Exp * Exp * pos

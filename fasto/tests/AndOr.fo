@@ -1,1 +1,4 @@
-fun bool main() = true
+fun [char] main() =
+    if true
+    then write ("True")
+    else write ("false")
