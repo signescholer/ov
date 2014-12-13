@@ -254,42 +254,33 @@ structure CodeGen = struct
             val code2 = compileExp e2 vtable t2
         in  code1 @ code2 @ [Mips.DIV (place,t1,t2)]
         end
- (*   | And (e1, e2, pos) =>
-        let 
-            val t1 = newName "and_L"
-            val t2 = newName "and_R"
-            val code1 = compileExp e1 vtable t1
-            val code2 = compileExp e2 vtable t2
-        in code1 @ code2 @ [Mips.AND (place,t1,t2)]
-        end
-
-        
-
-    | Or (e1, e2, pos) =>
-        let val t1 = newName "or_L"
-            val t2 = newName "or_R"
-            val code1 = compileExp e1 vtable t1
-            val code2 = compileExp e2 vtable t2
-        in code1 @ code2 @ [Mips.OR (place,t1,t2)]
-        end
-        
-*)
 (*
-        result_reg = checkexp1
-        beq result_reg,$0,end
-        result_reg = checkexp2
+        And:
+        result = checkexp1
+        beq result,$0,end
+        result = checkexp2
         end
-
-
-  and compileCond c vtable tlab flab =
-    let val t1 = newName "cond"
-        val code1 = compileExp c vtable t1
-    in  code1 @ [Mips.BNE (t1, "0", tlab), Mips.J flab]
-    end
-
-Her er de grimme versioner:        
 *)
-    
+    | And (e1, e2, pos) =>
+        let val endLabel = newName "andend"
+            val code1 = compileExp e1 vtable place
+            val code2 = compileExp e2 vtable place
+        in code1 @ [ Mips.BEQ(place, "0", endLabel) ] @ code2 @ [Mips.LABEL endLabel]
+        end
+(*
+        Or:
+        result = checkexp1
+        bne result,$0,end
+        result = checkexp2
+        end
+*)
+    | Or (e1, e2, pos) =>
+        let val endLabel = newName "orend"
+            val code1 = compileExp e1 vtable place
+            val code2 = compileExp e2 vtable place
+        in code1 @ [ Mips.BNE(place, "0", endLabel) ] @ code2 @ [Mips.LABEL endLabel]
+        end
+    (*
     | And (e1, e2, pos) =>
         let val thenLabel = newName "andthen"
             val elseLabel = newName "andelse"
@@ -309,7 +300,7 @@ Her er de grimme versioner:
         in code1 @ [Mips.LABEL thenLabel,Mips.LI (place,"1")]  @
            [ Mips.J endLabel, Mips.LABEL elseLabel] @ code2 @ [Mips.LABEL endLabel]
         end
-        
+    *)
     | Not (e, pos) =>
         let val t = newName "not_"
             val code = compileExp e vtable t
