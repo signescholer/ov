@@ -1,0 +1,8 @@
+fun int square (int i) = i*i
+
+fun int writeInt(int j) = write(j)
+
+fun [int] main() =
+    let x = {1,2,3,4,5,6,7}
+    in let a = map(fn int (int y) => y*y, x)
+    in map(writeInt,a)
