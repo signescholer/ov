@@ -149,7 +149,7 @@ functor FastoFn (T : sig eqtype TypeAnnot end) = struct
     | ppExp d (Plus (e1, e2, pos))  =
         concat [ "(", ppExp d e1, " + ", ppExp d e2, ")" ]
     | ppExp d (Mult (e1, e2, pos))  =
-        concat [ "(", ppExp d e1, " + ", ppExp d e2, ")" ]
+        concat [ "(", ppExp d e1, " * ", ppExp d e2, ")" ]
     | ppExp d (Minus (e1, e2, pos)) =
         concat [ "(", ppExp d e1, " - ", ppExp d e2, ")" ]
     | ppExp d (Times (e1,e2,_))  = concat [ ppExp d e1, " * ", ppExp d e2 ]
