@@ -1,4 +1,6 @@
 fun [char] main() =
     if true
-    then write ("True")
-    else write ("false")
+    then if false
+        then write ("False does not work")
+        else write ("True and False both seem to work.")
+    else write ("True does not work.")
