@@ -38,11 +38,10 @@
        | "char"         => Parser.CHAR pos
        | "fun"          => Parser.FUN pos
        | "fn"           => Parser.FN pos
-       | "not"          =>  Parser.NOT pos
+       | "not"          => Parser.NOT pos
        | "true"         => Parser.TRUE pos
-       | "false"        => Parser.FALSE pos 
-
-(* specials: *)
+       | "false"        => Parser.FALSE pos
+       (* specials: *)
        | "iota"         => Parser.IOTA pos
        | "replicate"    => Parser.REPLICATE pos
        | "map"          => Parser.MAP pos
@@ -53,7 +52,6 @@
        | "write"        => Parser.WRITE pos
        | "op"           => Parser.OP pos
        | _              => Parser.ID (s, pos)
-
  }
 
 rule Token = parse
