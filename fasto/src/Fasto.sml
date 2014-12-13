@@ -51,7 +51,7 @@ datatype Value =
   | BoolVal of bool
   | CharVal of char
   | ArrayVal of Value list * Type
-
+ 
 fun valueType (IntVal _)          = Int
   | valueType (BoolVal _)         = Bool
   | valueType (CharVal _)         = Char

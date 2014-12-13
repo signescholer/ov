@@ -364,10 +364,10 @@ and checkFunArg (In.FunName fname, vtab, ftab, pos) =
 
   | checkFunArg (In.Lambda (ret_type, params, exp, funpos) , vtab, ftab, pos) =
        (* FN Type LPAR Params RPAR FNEQ Exp { Lambda ($2, $4, $7, $1) } *)
-            let val Out.FunDec (fname, ret_type, args, _, pos) = 
+            let val Out.FunDec (fname, ret_type, args, body, pos) = 
                     checkFunWithVtable (In.FunDec ("anon", ret_type, params, exp, funpos), vtab, ftab, pos)
                 val arg_types = map (fn (Param (_, ty)) => ty) args
-                in (Out.FunName fname, ret_type, arg_types)
+                in (Out.Lambda (ret_type, args, body, funpos), ret_type, arg_types)
             end
         (* TODO TASK 3:
 

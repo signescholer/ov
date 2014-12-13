@@ -510,12 +510,25 @@ and evalFunArg (FunName fid, vtab, ftab, callpos) =
         NONE   => raise Error("Function "^fid^" is not in SymTab!", callpos)
       | SOME f => (fn aargs => callFun(f, aargs, ftab, callpos), getFunRTP f)
     end
+  (* Out.Lambda (ret_type, args, body, funpos) *)
+    | evalFunArg (Lambda (ret_type, args, body, funpos), vtab, ftab, callpos) =
+        let val aargs = map (fn (Param (vid, _)) => (case SymTab.lookup(vid) vtab of SOME m => m
+                                                                             | NONE => raise Error ("I don't know why it's doing this.",funpos) )) args
+            in (fn aargs => callFunWithVtable (FunDec ("anon", ret_type, args, body, funpos), aargs, vtab, ftab, callpos), ret_type)
+            end
+
+            (* Param (id, tp) *)
+            
+(*        let val sth = callFunWithVtable (FunDec (fid, rtp    , fargs, body,  pdcl),    aargs, vtab, ftab, pcall) = *)
+  
    (* TODO TASK 3:
 
    Add case for Lambda.  This can be done by constructing an
    appropriate FunDec from the lambda and passing it to
    callFunWithVtable.
-    *)
+    *)    
+    
+  
 
 (* Interpreter for Fasto programs:
     1. builds the function symbol table,
