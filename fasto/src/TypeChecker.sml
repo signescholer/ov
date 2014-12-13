@@ -26,13 +26,6 @@ structure Out = Fasto.KnownTypes
 type functionTable = (Type * Type list * pos) SymTab.SymTab
 type variableTable = Type SymTab.SymTab
 
-val counter = ref 0
-fun anonName af_name =                              (*FIXME this doesn't need to be an and. Put it somewhere else. *)
-      let val () = counter := !counter + 1
-          val n = Int.toString (!counter)
-      in af_name ^ "_" ^ n end
-   
-
 (* Table of predefined conversion functions *)
 val initFunctionTable : functionTable =
     SymTab.fromList
@@ -371,9 +364,8 @@ and checkFunArg (In.FunName fname, vtab, ftab, pos) =
 
   | checkFunArg (In.Lambda (ret_type, params, exp, funpos) , vtab, ftab, pos) =
        (* FN Type LPAR Params RPAR FNEQ Exp { Lambda ($2, $4, $7, $1) } *)
-            let val fname = anonName "anon"
-                val Out.FunDec (fname, ret_type, args, _, pos) = 
-                    checkFunWithVtable (In.FunDec (fname, ret_type, params, exp, funpos), vtab, ftab, pos)
+            let val Out.FunDec (fname, ret_type, args, _, pos) = 
+                    checkFunWithVtable (In.FunDec ("anon", ret_type, params, exp, funpos), vtab, ftab, pos)
                 val arg_types = map (fn (Param (_, ty)) => ty) args
                 in (Out.FunName fname, ret_type, arg_types)
             end
