@@ -512,10 +512,8 @@ and evalFunArg (FunName fid, vtab, ftab, callpos) =
     end
   (* Out.Lambda (ret_type, args, body, funpos) *)
     | evalFunArg (Lambda (ret_type, args, body, funpos), vtab, ftab, callpos) =
-        let val aargs = map (fn (Param (vid, _)) => (case SymTab.lookup(vid) vtab of SOME m => m
-                                                                             | NONE => raise Error ("I don't know why it's doing this.",funpos) )) args
-            in (fn aargs => callFunWithVtable (FunDec ("anon", ret_type, args, body, funpos), aargs, vtab, ftab, callpos), ret_type)
-            end
+            (fn aargs => callFunWithVtable (FunDec ("anon", ret_type, args, body, funpos), aargs, vtab, ftab, callpos), ret_type)
+   
 
             (* Param (id, tp) *)
             
