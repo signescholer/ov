@@ -13,6 +13,8 @@ open Fasto.KnownTypes
 datatype Propagatee = ConstProp of Value
                     | VarProp of string
 
+exception Error of string * pos
+
 fun copyConstPropFoldExp vtable e =
     case e of
         Constant x => Constant x
@@ -51,6 +53,77 @@ fun copyConstPropFoldExp vtable e =
              | _ =>
                Minus (e1', e2', pos)
         end
+      (* Times, Divide, Negate, Not, And, Or *)
+      | Times (e1, e2, pos) =>
+        let val e1' = copyConstPropFoldExp vtable e1
+            val e2' = copyConstPropFoldExp vtable e2
+        in case (e1', e2') of
+               (Constant (IntVal x, _), Constant (IntVal y, _)) =>
+               Constant (IntVal (x*y), pos)
+             | (Constant (IntVal 0, _), _) =>
+               Constant (IntVal 0, pos)
+             | (_, Constant (IntVal 0, _)) =>
+               Constant (IntVal 0, pos)
+             | _ =>
+               Times (e1', e2', pos)
+        end      
+      | Divide (e1, e2, pos) =>
+        let val e1' = copyConstPropFoldExp vtable e1
+            val e2' = copyConstPropFoldExp vtable e2
+        in case (e1', e2') of
+               (Constant (IntVal x, _), Constant (IntVal y, _)) =>
+               Constant (IntVal (x div y), pos)
+             | (Constant (IntVal 0, _), _) =>
+               Constant (IntVal 0, pos)
+             | (_, Constant (IntVal 0, _)) =>
+               raise Error ("You are trying to divide by zero!",pos)
+             | _ =>
+               Divide (e1', e2', pos)
+        end
+      | Negate (e, pos) =>
+        let val e' = copyConstPropFoldExp vtable e
+        in case e of
+            Constant (IntVal x,_) => Constant (IntVal (0-x),pos)
+          | _ => Negate(e',pos)
+        end
+      | Not (e, pos) =>
+        let val e' = copyConstPropFoldExp vtable e
+        in case e of
+            Constant (BoolVal true,_) => Constant (BoolVal false,pos)
+          | Constant (BoolVal false,_) => Constant (BoolVal true,pos)
+          | _ => Not(e',pos)
+        end
+      | And (e1, e2, pos) =>
+        let val e1' = copyConstPropFoldExp vtable e1
+            val e2' = copyConstPropFoldExp vtable e2
+        in case (e1', e2') of
+               (Constant (BoolVal false, _), _) =>
+               Constant (BoolVal false, pos)
+             | (_, Constant (BoolVal false, _)) =>
+               Constant (BoolVal false, pos)
+             | (Constant (BoolVal true, _), _) =>
+               e2'
+             | (_,Constant (BoolVal true, _)) =>
+               e1'
+             | _ =>
+               And (e1', e2', pos)
+        end
+      | Or (e1, e2, pos) =>
+        let val e1' = copyConstPropFoldExp vtable e1
+            val e2' = copyConstPropFoldExp vtable e2
+        in case (e1', e2') of
+               (Constant (BoolVal true, _), _) =>
+               Constant (BoolVal true, pos)
+             | (_, Constant (BoolVal true, _)) =>
+               Constant (BoolVal true, pos)
+             | (Constant (BoolVal false, _), _) =>
+               e2'
+             | (_,Constant (BoolVal false, _)) =>
+               e1'
+             | _ =>
+               Or (e1', e2', pos)
+        end        
+        (* FIXME Tjek om de indeholder IO. Så kan de ikke foldes. *)
       | Equal (e1, e2, pos) =>
         let val e1' = copyConstPropFoldExp vtable e1
             val e2' = copyConstPropFoldExp vtable e2
