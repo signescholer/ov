@@ -22,12 +22,7 @@ fun copyConstPropFoldExp vtable e =
       | ArrayLit (es, t, pos) =>
         ArrayLit (map (copyConstPropFoldExp vtable) es, t, pos)
       | Var (name, pos) =>
-           case SymTab.lookup name vtable of
-                SOME (Constant (x)) => Constant(x,pos)
-                SOME (VarProp newname) => Var (newname, pos)
-              | _ => Var (name, pos)
-              
-              
+
         (* TODO TASK 4: This case currently does nothing.
 
          You must perform a lookup in the symbol table and if you find
@@ -85,6 +80,7 @@ fun copyConstPropFoldExp vtable e =
              | _ =>
                Divide (e1', e2', pos)
         end
+   (*   Negate, Not, And, Or     *)
       | Negate (e, pos) =>
         let val e' = copyConstPropFoldExp vtable e
         in case e of
