@@ -2,6 +2,10 @@
 
 structure CodeGen = struct
 
+
+  (* applyArgs: fid, args, place, pos - jal til fid og move v0 til place bagefter *)
+
+
 (*
     exception Error of string * Fasto.pos
 
@@ -144,9 +148,11 @@ structure CodeGen = struct
   (* For each register 'r' in 'rs', copy them to registers from
   'firstReg' and counting up. Return the full code and the next unused
   register (firstReg + num_args).  *)
+  
   fun applyRegs( fid: string,
                  args: string list,
-                 place: string, pos) : Mips.Prog =
+                 place: string,
+                 pos) : Mips.Prog =
       let val regs_num = length args
           val caller_regs =
               List.tabulate (regs_num, fn n => makeConst (n + minReg))
@@ -647,7 +653,7 @@ structure CodeGen = struct
     
     | Filter (farg, arr_exp, elem_type, pos) =>
     
-      (* TODO: TASK 2: Add case for Filter.
+      (* DONE TODO: TASK 2: Add case for Filter.
          Start by allocating an array of the same size as the input array.  Then,
          for each element in the input array, if the predicate function is true
          copy it to the result array.  Finally, fix the length-field at the end,
@@ -877,15 +883,35 @@ structure CodeGen = struct
    A good solution is to transform the array comprehension to an
    expression using map and filter, then run compileExp on that. *)
 
+  and getArgs     []      vtable   _     = ([], vtable)
+    | getArgs (Param (v,_)::vs) vtable nextReg =
+             if nextReg > maxCaller
+             then raise Error ("Passing too many arguments!", (0,0))
+             else
+               let val vname = newName ("param_" ^ v)
+                   val vtable1 = SymTab.bind v vname vtable (*   (v,vname)::vtable   *)
+                   val (code2,vtable2) = getArgs vs vtable1 (nextReg + 1)
+               in ([Mips.MOVE (vname, makeConst nextReg)]
+                   @ code2, vtable2)
+               end
+   
   and applyFunArg (FunName s, args, vtable, place, pos) : Mips.Prog =
       let val tmp_reg = newName "tmp_reg"
       in  applyRegs(s, args, tmp_reg, pos) @ [Mips.MOVE(place, tmp_reg)] end
-     (* TODO TASK 3:
-        Add case for Lambda.  This is very similar to how function
-        definitions work.  You need to bind the parameters of the
-        Lambda to the registers in 'args', compile the body of the
-        lambda, then finally move the result of the body to the
-        'place' register.
+    | applyFunArg (Lambda (ret_type, args, body, funpos), aargs, vtab, place, callpos) : Mips.Prog =
+      let val tmp_reg = newName "tmp_reg"
+          val funlabel = newName "anon_fun"
+          val fun_res = newName "anon_fun_res"
+          val (argcode, vtable_local) = getArgs args vtab minReg
+          val compile_body = compileExp body vtable_local fun_res
+          
+      in  applyRegs(funlabel, aargs, tmp_reg, callpos) @ [Mips.LABEL funlabel] @ argcode @ compile_body @ [Mips.MOVE(place, fun_res)] end
+
+     (* DONE TODO TASK 3:
+        Add case for Lambda. This is very similar to how function definitions work.
+        You need to bind the parameters of the Lambda to the registers in 'args',
+        compile the body of the lambda,
+        then finally move the result of the body to the 'place' register.
       *)
 
   (* compile condition *)
