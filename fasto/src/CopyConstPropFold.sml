@@ -21,14 +21,19 @@ fun copyConstPropFoldExp vtable e =
       | StringLit x => StringLit x
       | ArrayLit (es, t, pos) =>
         ArrayLit (map (copyConstPropFoldExp vtable) es, t, pos)
-      | Var (name, pos) =>
-
+      | Var (name, pos) => ( case SymTab.lookup name vtable of
+                            SOME (ConstProp x)        => Constant (x,pos) 
+                          | SOME (VarProp proppedVar) => Var (proppedVar,pos)
+                          | NONE                      => Var (name, pos)
+                          | _                         => raise Error ("I sure hope this doesn't happen.",pos)
+            )
+                
         (* TODO TASK 4: This case currently does nothing.
 
          You must perform a lookup in the symbol table and if you find
          a Propagatee, return either a new Var or Constant node. *)
 
-        Var (name, pos)
+
       | Plus (e1, e2, pos) =>
         let val e1' = copyConstPropFoldExp vtable e1
             val e2' = copyConstPropFoldExp vtable e2
@@ -80,7 +85,6 @@ fun copyConstPropFoldExp vtable e =
              | _ =>
                Divide (e1', e2', pos)
         end
-   (*   Negate, Not, And, Or     *)
       | Negate (e, pos) =>
         let val e' = copyConstPropFoldExp vtable e
         in case e of
