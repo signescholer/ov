@@ -165,7 +165,7 @@ fun copyConstPropFoldExp vtable e =
       | Let (Dec (name, e, decpos), body, pos) =>
 
       
-        (* TODO TASK 4: This case currently does nothing.
+        (* DONE TODO TASK 4: This case currently does nothing.
 
          You must extend this case to expand the vtable' with whatever
          Propagatee that you can get out of e'.  That is, inspect e'
