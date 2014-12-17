@@ -19,7 +19,7 @@ fun empty () = []
 fun lookup n [] = NONE
   | lookup n ((n1,i1)::tab) =
       if n = n1 then SOME i1 else lookup n tab
-
+(* n = name, i = element, stab = forrige vtable *)
 fun bind n i stab = (n,i)::stab
 
 fun remove n =

@@ -164,12 +164,6 @@ fun copyConstPropFoldExp vtable e =
         Apply (fname, map (copyConstPropFoldExp vtable) es, pos)
       | Let (Dec (name, e, decpos), body, pos) =>
 
-      ( case SymTab.lookup name vtable of
-                            SOME (ConstProp x)        => Constant (x,pos) 
-                          | SOME (VarProp proppedVar) => Var (proppedVar,pos)
-                          | NONE                      => Var (name, pos)
-                          | _                         => raise Error ("I sure hope this doesn't happen.",pos)
-            )
       
         (* TODO TASK 4: This case currently does nothing.
 
@@ -179,13 +173,11 @@ fun copyConstPropFoldExp vtable e =
          insert the appropriate Propagatee value in vtable. *)
 
         let val e' = copyConstPropFoldExp vtable e
-            val vtable' = 
-                  ( case e' of
-                            ConstProp x        => SymTab.bind x name vtable 
-                          | VarProp x          => SymTab.bind x name vtable
-                          | NONE               => vtable
-                          | _                  => raise Error ("I sure hope this doesn't happen.",pos)
-            )
+            val vtable' =  case e' of
+                            Constant (x,_)        => SymTab.bind name (ConstProp x) vtable 
+                          | Var (x,_)             => SymTab.bind name (VarProp x) vtable
+                          | _                 => vtable
+                          
             
         in Let (Dec (name, e', decpos),
                 copyConstPropFoldExp vtable' body,
