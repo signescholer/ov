@@ -28,7 +28,7 @@ fun copyConstPropFoldExp vtable e =
                           | _                         => raise Error ("I sure hope this doesn't happen.",pos)
             )
                 
-        (* TODO TASK 4: This case currently does nothing.
+        (* DONE TODO TASK 4: This case currently does nothing.
 
          You must perform a lookup in the symbol table and if you find
          a Propagatee, return either a new Var or Constant node. *)
@@ -164,6 +164,13 @@ fun copyConstPropFoldExp vtable e =
         Apply (fname, map (copyConstPropFoldExp vtable) es, pos)
       | Let (Dec (name, e, decpos), body, pos) =>
 
+      ( case SymTab.lookup name vtable of
+                            SOME (ConstProp x)        => Constant (x,pos) 
+                          | SOME (VarProp proppedVar) => Var (proppedVar,pos)
+                          | NONE                      => Var (name, pos)
+                          | _                         => raise Error ("I sure hope this doesn't happen.",pos)
+            )
+      
         (* TODO TASK 4: This case currently does nothing.
 
          You must extend this case to expand the vtable' with whatever
@@ -172,7 +179,14 @@ fun copyConstPropFoldExp vtable e =
          insert the appropriate Propagatee value in vtable. *)
 
         let val e' = copyConstPropFoldExp vtable e
-            val vtable' = vtable
+            val vtable' = 
+                  ( case e' of
+                            ConstProp x        => SymTab.bind x name vtable 
+                          | VarProp x          => SymTab.bind x name vtable
+                          | NONE               => vtable
+                          | _                  => raise Error ("I sure hope this doesn't happen.",pos)
+            )
+            
         in Let (Dec (name, e', decpos),
                 copyConstPropFoldExp vtable' body,
                 pos)
@@ -218,8 +232,8 @@ fun copyConstPropFoldExp vtable e =
       | Write (e, t, pos) =>
         Write (copyConstPropFoldExp vtable e, t, pos)
 
-  (* TODO TASKS 1/4: add cases for Times, Divide, Negate, Not, And, Or.  Look at
-  how Plus and Minus are implemented for inspiration.
+  (* DONE TODO TASKS 1/4: add cases for Times, Divide, Negate, Not, And, Or.  Look at
+     how Plus and Minus are implemented for inspiration.
    *)
 
 and copyConstPropFoldFunArg vtable (FunName fname) =
