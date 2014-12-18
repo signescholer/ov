@@ -1,2 +1,2 @@
 fun bool main() =
-  1==1 or 'c'
+  (1==1) || "c"
