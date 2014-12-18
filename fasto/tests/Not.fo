@@ -1,0 +1,5 @@
+fun bool n(bool n) = not(n)
+    
+fun bool main() = 
+    let n = read(bool) in
+    write( n(n) )
