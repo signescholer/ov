@@ -193,8 +193,9 @@ fun evalExp ( Constant (v,_), vtab, ftab ) = v
   | evalExp ( And(e1, e2,  pos), vtab, ftab ) =
         let val res1 = evalExp(e1, vtab, ftab)
         in case res1 of
-              BoolVal true  => evalExp(e2, vtab, ftab)
-           |  BoolVal false => BoolVal false
+             BoolVal true  => evalExp(e2, vtab, ftab)
+           | BoolVal false => BoolVal false
+           | _ => raise Error ("An evaluated argument in And is not a bool.\n",pos)
         end
 
   | evalExp ( Or(e1, e2,  pos), vtab, ftab ) =
@@ -202,6 +203,7 @@ fun evalExp ( Constant (v,_), vtab, ftab ) = v
         in case res1 of
               BoolVal false  => evalExp(e2, vtab, ftab)
            |  BoolVal true => BoolVal true
+           |  _ => raise Error ("An evaluated argument in Or is not a bool.\n",pos)
         end
 
   | evalExp ( Negate(e, pos), vtab, ftab ) =
