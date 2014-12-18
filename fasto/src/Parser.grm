@@ -24,9 +24,10 @@ open Fasto.UnknownTypes
 %left DEQ LTH
 %left PLUS MINUS
 %left MULT DIV
+%nonassoc NOT
 %left OR
 %left AND
-%nonassoc NOT NEGATE
+%nonassoc NEGATE
 
 %start Prog
 %type <Fasto.UnknownTypes.Prog> Prog
