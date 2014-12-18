@@ -1,0 +1,7 @@
+fun int mult(int n, int k) = n*k
+    
+fun int main() = 
+    let n = read(int) in
+    let k = read(int) in
+    write( mult(n,k) )
+

@@ -1,0 +1,6 @@
+fun bool og(bool n, bool k) = n && k
+    
+fun bool main() = 
+    let n = read(bool) in
+    let k = read(bool) in
+    write( og(n,k) )
