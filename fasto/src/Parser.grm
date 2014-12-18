@@ -131,4 +131,6 @@ Exps : Exp COMMA Exps   { $1 :: $3 }
 FunArg : ID { FunName (#1 $1) }
        | FN Type LPAR Params RPAR FNEQ Exp
        { Lambda ($2, $4, $7, $1) }
+       | FN Type LPAR RPAR FNEQ Exp
+       { Lambda ($2, [], $6, $1) }
 ;
