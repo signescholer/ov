@@ -1,0 +1,6 @@
+fun bool og(bool n, bool k) = n && k
+    
+fun bool main() = 
+    let n = 000 in
+    let k = 00 in
+    write( og(n,k) )
