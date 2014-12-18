@@ -127,8 +127,7 @@ fun copyConstPropFoldExp vtable e =
                e1'
              | _ =>
                Or (e1', e2', pos)
-        end        
-        (* FIXME Tjek om de indeholder IO. Så kan de ikke foldes. *)
+        end
       | Equal (e1, e2, pos) =>
         let val e1' = copyConstPropFoldExp vtable e1
             val e2' = copyConstPropFoldExp vtable e2
@@ -176,9 +175,8 @@ fun copyConstPropFoldExp vtable e =
             val vtable' =  case e' of
                             Constant (x,_)        => SymTab.bind name (ConstProp x) vtable 
                           | Var (x,_)             => SymTab.bind name (VarProp x) vtable
-                          | _                 => vtable
-                          
-            
+                          | _                     => SymTab.remove name vtable
+
         in Let (Dec (name, e', decpos),
                 copyConstPropFoldExp vtable' body,
                 pos)
