@@ -121,13 +121,16 @@ and checkExp ftab vtab (exp : In.Exp)
          in (Int,
              Out.Divide (e1_dec, e2_dec, pos))
          end
-         
-| In.Negate (e1, pos)
+    | In.Negate (e1, pos)
       => let val (_, e1_dec) = checkUnOp ftab vtab (pos, Int, e1)
          in (Int,
              Out.Negate (e1_dec, pos))
          end
-  
+    | In.Not (e1, pos)
+      => let val (_, e1_dec) = checkUnOp ftab vtab (pos, Bool, e1)
+         in (Bool,
+             Out.Not (e1_dec, pos))
+         end
     | In.Minus (e1, e2, pos)
       => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Int, e1, e2)
          in (Int,
@@ -339,15 +342,15 @@ and checkExp ftab vtab (exp : In.Exp)
                               ^ ppType n_type, pos)
          end
 
-  (* TODO TASK 1: add case for constant booleans (True/False). *)
+  (* DONE TODO TASK 1: add case for constant booleans (True/False). *)
 
-  (* TODO TASK 1: add cases for Times, Divide, Negate, Not, And, Or.  Look at
+  (* DONE TODO TASK 1: add cases for Times, Divide, Negate, Not, And, Or.  Look at
   how Plus and Minus are implemented for inspiration.
    *)
 
-  (* TODO: TASK 2: Add case for Scan. Quite similar to Reduce. *)
+  (* DONE TODO: TASK 2: Add case for Scan. Quite similar to Reduce. *)
 
-  (* TODO: TASK 2: Add case for Filter.  Quite similar to map, except that the
+  (* DONE TODO: TASK 2: Add case for Filter.  Quite similar to map, except that the
      return type is the same as the input array type, and the function must
      return bool.  *)
 
