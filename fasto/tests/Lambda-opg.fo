@@ -1,0 +1,6 @@
+fun [int] main() = 
+	let n = read(int) in 
+	let a = map(fn int (int i) => read(int), iota(n)) 
+	in let x = read(int) 
+	in let b = map(fn int (int y) => write(x + y), a) 
+	in (b)
