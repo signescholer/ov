@@ -5,3 +5,4 @@ fasto/src/*.sig
 fasto/src/make
 fasto/src/Parser.sml
 fasto/src/Lexer.sml
+fasto/tests/typechecking2.fo

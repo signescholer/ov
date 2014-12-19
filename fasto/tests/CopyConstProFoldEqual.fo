@@ -1,0 +1,5 @@
+
+fun [char] main () = 
+    let a = read(int) in
+    let b = read(int) in
+    if a == b then write("They are equal.") else write ("They are not equal.")

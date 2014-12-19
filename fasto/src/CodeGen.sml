@@ -260,33 +260,6 @@ structure CodeGen = struct
             val code2 = compileExp e2 vtable t2
         in  code1 @ code2 @ [Mips.DIV (place,t1,t2)]
         end
-(*
-        And:
-        result = checkexp1
-        beq result,$0,end
-        result = checkexp2
-        end
-*)
-    | And (e1, e2, pos) =>
-        let val endLabel = newName "andend"
-            val code1 = compileExp e1 vtable place
-            val code2 = compileExp e2 vtable place
-        in code1 @ [ Mips.BEQ(place, "0", endLabel) ] @ code2 @ [Mips.LABEL endLabel]
-        end
-(*
-        Or:
-        result = checkexp1
-        bne result,$0,end
-        result = checkexp2
-        end
-*)
-    | Or (e1, e2, pos) =>
-        let val endLabel = newName "orend"
-            val code1 = compileExp e1 vtable place
-            val code2 = compileExp e2 vtable place
-        in code1 @ [ Mips.BNE(place, "0", endLabel) ] @ code2 @ [Mips.LABEL endLabel]
-        end
-    (*
     | And (e1, e2, pos) =>
         let val thenLabel = newName "andthen"
             val elseLabel = newName "andelse"
@@ -306,7 +279,19 @@ structure CodeGen = struct
         in code1 @ [Mips.LABEL thenLabel,Mips.LI (place,"1")]  @
            [ Mips.J endLabel, Mips.LABEL elseLabel] @ code2 @ [Mips.LABEL endLabel]
         end
-    *)
+(*    | And (e1, e2, pos) =>
+        let val endLabel = newName "andend"
+            val code1 = compileExp e1 vtable place
+            val code2 = compileExp e2 vtable place
+        in code1 @ [ Mips.BEQ(place, "0", endLabel) ] @ code2 @ [Mips.LABEL endLabel]
+        end
+    | Or (e1, e2, pos) =>
+        let val endLabel = newName "orend"
+            val code1 = compileExp e1 vtable place
+            val code2 = compileExp e2 vtable place
+        in code1 @ [ Mips.BNE(place, "0", endLabel) ] @ code2 @ [Mips.LABEL endLabel]
+        end
+*)
     | Not (e, pos) =>
         let val t = newName "not_"
             val code = compileExp e vtable t
