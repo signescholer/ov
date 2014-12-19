@@ -81,7 +81,7 @@ rule Token = parse
 							  String.size s - 2)),
 			     getPos lexbuf) }
   | `+`                 { Parser.PLUS   (getPos lexbuf) }
-  | `*`                 { Parser.MULT   (getPos lexbuf) }
+  | `*`                 { Parser.TIMES   (getPos lexbuf) }
   | `/`                 { Parser.DIV   (getPos lexbuf) }
   | `&``&`              { Parser.AND   (getPos lexbuf) }
   | `|``|`              { Parser.OR   (getPos lexbuf) }

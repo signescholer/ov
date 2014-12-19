@@ -73,7 +73,7 @@ functor FastoFn (T : sig eqtype TypeAnnot end) = struct
     | ArrayLit of Exp list * T.TypeAnnot * pos
     | Var of string * pos
     | Plus of Exp * Exp * pos
-    | Mult of Exp * Exp * pos
+    | Times of Exp * Exp * pos
     | Minus of Exp * Exp * pos
     | Equal of Exp * Exp * pos
     | Less of Exp * Exp * pos
@@ -93,7 +93,6 @@ functor FastoFn (T : sig eqtype TypeAnnot end) = struct
     (* The following are project tasks. *)
     | Filter of FunArg * Exp * T.TypeAnnot * pos           (* filter(f, arr) *)
     | Scan of FunArg * Exp * Exp * T.TypeAnnot * pos      (* scan(f, 0, arr) *)
-    | Times of Exp * Exp * pos
     | Divide of Exp * Exp * pos
     | And of Exp * Exp * pos
     | Or of Exp * Exp * pos
@@ -148,11 +147,10 @@ functor FastoFn (T : sig eqtype TypeAnnot end) = struct
     | ppExp d (Var (id, pos)) = id
     | ppExp d (Plus (e1, e2, pos))  =
         concat [ "(", ppExp d e1, " + ", ppExp d e2, ")" ]
-    | ppExp d (Mult (e1, e2, pos))  =
+    | ppExp d (Times (e1, e2, pos))  =
         concat [ "(", ppExp d e1, " * ", ppExp d e2, ")" ]
     | ppExp d (Minus (e1, e2, pos)) =
         concat [ "(", ppExp d e1, " - ", ppExp d e2, ")" ]
-    | ppExp d (Times (e1,e2,_))  = concat [ ppExp d e1, " * ", ppExp d e2 ]
     | ppExp d (Divide (e1,e2,_)) = concat [ ppExp d e1, " / ", ppExp d e2 ]
     | ppExp d (And (e1,e2,_))    = concat [ ppExp d e1, " && ", ppExp d e2 ]
     | ppExp d (Or (e1,e2,_))     = concat [ ppExp d e1, " || ", ppExp d e2 ]

@@ -250,7 +250,7 @@ structure CodeGen = struct
             val code2 = compileExp e2 vtable t2
         in  code1 @ code2 @ [Mips.SUB (place,t1,t2)]
         end
-    | Mult (e1, e2, pos) =>
+    | Times (e1, e2, pos) =>
         let val t1 = newName "mult_L"
             val t2 = newName "mult_R"
             val code1 = compileExp e1 vtable t1

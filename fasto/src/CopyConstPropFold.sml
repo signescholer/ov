@@ -25,7 +25,6 @@ fun copyConstPropFoldExp vtable e =
                             SOME (ConstProp x)        => Constant (x,pos) 
                           | SOME (VarProp proppedVar) => Var (proppedVar,pos)
                           | NONE                      => Var (name, pos)
-                          | _                         => raise Error ("I sure hope this doesn't happen.",pos)
             )
                 
         (* DONE TODO TASK 4: This case currently does nothing.
