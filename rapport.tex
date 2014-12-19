@@ -12,7 +12,10 @@
 \usepackage{listings}
 
 \lstset{
-         numbers=left
+         numbers=left,
+         frame=single,
+         basicstyle=\ttfamily,
+         breaklines=true
  }
  
 \begin{document}
@@ -54,10 +57,10 @@ We've added "not", "true" and "false" to the listed keywords:
 rule Token = parse
 ...
   | `*`                 { Parser.TIMES   (getPos lexbuf) }
-  | `/`                 { Parser.DIV   (getPos lexbuf) }
-  | `&``&`              { Parser.AND   (getPos lexbuf) }
-  | `|``|`              { Parser.OR   (getPos lexbuf) }
-  | `~`                 { Parser.NEGATE   (getPos lexbuf) }
+  | `/`                 { Parser.DIV     (getPos lexbuf) }
+  | `&``&`              { Parser.AND     (getPos lexbuf) }
+  | `|``|`              { Parser.OR      (getPos lexbuf) }
+  | `~`                 { Parser.NEGATE  (getPos lexbuf) }
 \end{lstlisting}
 
 From Parser.grm:\\
@@ -75,7 +78,6 @@ From Parser.grm:\\
       | Exp TIMES Exp  { Times ($1, $3, $2) }
       | Exp DIV   Exp  { Divide ($1, $3, $2) }
 \end{lstlisting}
-
 
 \subsection{Precedence}
 To ensure the operators have the precedence specified in the assignment text we've listed each of them in the precedence hierarchy in Parser.grm as follows: 
@@ -117,15 +119,7 @@ which had to be done with short-circuiting:
            [ Mips.J endLabel, Mips.LABEL elseLabel, Mips.LI (place,"0"), Mips.LABEL endLabel]
         end
 \end{lstlisting}
-
-\noindent We based this on the following assembly code (for And):
-\begin{lstlisting}
-    res_reg = checkexp1
-    beq result,$0,end
-    res_reg = checkexp2
-    end
-\end{lstlisting}
-The idea is that if the first expression is false, the result will be false as well and if the first expression is true, the result will depend on (be equal to) the result of the second expression.\\
+\noindent As suggested we used compileCond to save jumps.
 \\
 Or was implemented similarly.
 \subsection{Negate and Not}
@@ -289,6 +283,19 @@ In the type checker we added a case for anonymous functions in checkFunArg (line
 \end{lstlisting}
 
 \subsection{Tests}
+
+Lamda-opg.fo\\
+We have copied this test from the assignment text, though we have made a few adjustments:
+\begin{lstlisting}
+fun [int] main() = 
+	let n = read(int) in 
+	let a = map(fn int (int i) => read(int), iota(n)) 
+	in let x = read(int) 
+	in let b = map(fn int (int y) => write(x + y), a) 
+	in (b)
+\end{lstlisting}
+\noindent The original program attempted to pass Write a list of integers, which is not possible, so we have moved the call to write into the anonymous function in line 5 and changed the return type of main from [char] to [int] to accommodate the new return value.\\
+The test runs as expected.
 
 \newpage
 

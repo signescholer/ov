@@ -1,7 +1,7 @@
 \select@language {danish}
 \contentsline {section}{\numberline {1}Introduktion}{3}{section.1}
 \contentsline {section}{\numberline {2}Task 1 - Extra operators}{3}{section.2}
-\contentsline {subsection}{\numberline {2.1}Precedence}{3}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.1}Precedence}{4}{subsection.2.1}
 \contentsline {subsection}{\numberline {2.2}And and Or}{4}{subsection.2.2}
 \contentsline {subsection}{\numberline {2.3}Negate and Not}{4}{subsection.2.3}
 \contentsline {subsection}{\numberline {2.4}True and False}{5}{subsection.2.4}
@@ -11,12 +11,12 @@
 \contentsline {subsection}{\numberline {3.2}Scan}{7}{subsection.3.2}
 \contentsline {subsection}{\numberline {3.3}Tests}{7}{subsection.3.3}
 \contentsline {section}{\numberline {4}Task 3 - Lambda-expressions}{8}{section.4}
-\contentsline {subsection}{\numberline {4.1}Tests}{8}{subsection.4.1}
-\contentsline {section}{\numberline {5}Task 4 - ConstCopyPropFold}{9}{section.5}
-\contentsline {subsection}{\numberline {5.1}Shadowing}{9}{subsection.5.1}
-\contentsline {subsection}{\numberline {5.2}Tests}{9}{subsection.5.2}
-\contentsline {section}{\numberline {6}Appendices}{9}{section.6}
-\contentsline {subsection}{\numberline {6.1}Task 1 - TypeChecker.sml}{9}{subsection.6.1}
-\contentsline {subsection}{\numberline {6.2}Task 1 - Interpreter.sml}{10}{subsection.6.2}
-\contentsline {subsection}{\numberline {6.3}Filter - CodeGen.sml}{11}{subsection.6.3}
-\contentsline {subsection}{\numberline {6.4}Scan - CodeGen.sml}{12}{subsection.6.4}
+\contentsline {subsection}{\numberline {4.1}Tests}{9}{subsection.4.1}
+\contentsline {section}{\numberline {5}Task 4 - ConstCopyPropFold}{10}{section.5}
+\contentsline {subsection}{\numberline {5.1}Shadowing}{10}{subsection.5.1}
+\contentsline {subsection}{\numberline {5.2}Tests}{10}{subsection.5.2}
+\contentsline {section}{\numberline {6}Appendices}{10}{section.6}
+\contentsline {subsection}{\numberline {6.1}Task 1 - TypeChecker.sml}{10}{subsection.6.1}
+\contentsline {subsection}{\numberline {6.2}Task 1 - Interpreter.sml}{11}{subsection.6.2}
+\contentsline {subsection}{\numberline {6.3}Filter - CodeGen.sml}{12}{subsection.6.3}
+\contentsline {subsection}{\numberline {6.4}Scan - CodeGen.sml}{14}{subsection.6.4}
