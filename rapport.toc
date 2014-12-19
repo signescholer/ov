@@ -1,10 +1,11 @@
 \select@language {danish}
 \contentsline {section}{\numberline {1}Introduktion}{3}{section.1}
 \contentsline {section}{\numberline {2}Task 1 - Extra operators}{3}{section.2}
-\contentsline {subsection}{\numberline {2.1}And and Or}{3}{subsection.2.1}
-\contentsline {subsection}{\numberline {2.2}Negate and Not}{4}{subsection.2.2}
-\contentsline {subsection}{\numberline {2.3}True and False}{4}{subsection.2.3}
-\contentsline {subsection}{\numberline {2.4}Tests}{4}{subsection.2.4}
+\contentsline {subsection}{\numberline {2.1}Precedence}{3}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}And and Or}{4}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}Negate and Not}{4}{subsection.2.3}
+\contentsline {subsection}{\numberline {2.4}True and False}{5}{subsection.2.4}
+\contentsline {subsection}{\numberline {2.5}Tests}{5}{subsection.2.5}
 \contentsline {section}{\numberline {3}Task 2 - Filter and Scan}{7}{section.3}
 \contentsline {subsection}{\numberline {3.1}Filter}{7}{subsection.3.1}
 \contentsline {subsection}{\numberline {3.2}Scan}{7}{subsection.3.2}

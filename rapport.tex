@@ -9,14 +9,18 @@
 \usepackage[danish]{babel}
 \usepackage{fixltx2e}
 \usepackage{hyperref}
+\usepackage{listings}
 
+\lstset{
+         numbers=left
+ }
+ 
 \begin{document}
-		
 
 % \newcommand{\sup}{\textsuperscript}
 % \newcommand{\sub}{\textsuberscript}
 
-\title{Copmilers\\Group Assignment}
+\title{Compilers\\Group Assignment}
 \author{Martin Bech Hansen - pwl435\\Signe S. Jensen - smg399\\Thorkil Simon Kowalski Værge - wng750}
 
 \date{22/12-14}
@@ -35,81 +39,124 @@ This report covers extensions for the Fasto compiler as covered in the group ass
 
 As described in the assignment we've extended the Fasto compiler with the new functionality listed below:\\
 \\
-From Parser.grm:
-\begin{verbatim}
-  | TRUE           { Constant (BoolVal (true), $1) }
-  | FALSE          { Constant (BoolVal (false), $1) }
-  | Exp AND   Exp  { And ($1, $3, $2) }
-  | Exp OR    Exp  { Or ($1, $3, $2) }
-  | NOT       Exp  { Not ($2, $1) }
-  | NEGATE    Exp  { Negate ($2, $1) }
-  | Exp MULT  Exp  { Mult ($1, $3, $2) }
-  | Exp DIV   Exp  { Divide ($1, $3, $2) }
-\end{verbatim}
+From Lexer.lex:\\
+We've added "not", "true" and "false" to the listed keywords:
+\begin{lstlisting}
+ fun keyword (s, pos) =
+     case s of
+...
+       | "not"          => Parser.NOT pos
+       | "true"         => Parser.TRUE pos
+       | "false"        => Parser.FALSE pos       
+\end{lstlisting}
+\noindent And added Times, Div, And, Or and Negate to the parsed tokens:
+\begin{lstlisting}
+rule Token = parse
+...
+  | `*`                 { Parser.TIMES   (getPos lexbuf) }
+  | `/`                 { Parser.DIV   (getPos lexbuf) }
+  | `&``&`              { Parser.AND   (getPos lexbuf) }
+  | `|``|`              { Parser.OR   (getPos lexbuf) }
+  | `~`                 { Parser.NEGATE   (getPos lexbuf) }
+\end{lstlisting}
+
+From Parser.grm:\\
+\noindent We've added a case for each of the new operators and the two constants in the Expression declaration.
+\begin{lstlisting}
+    Exp :
+...
+      | TRUE           { Constant (BoolVal (true), $1) }
+      | FALSE          { Constant (BoolVal (false), $1) }
+...
+      | Exp AND   Exp  { And ($1, $3, $2) }
+      | Exp OR    Exp  { Or ($1, $3, $2) }
+      | NOT       Exp  { Not ($2, $1) }
+      | NEGATE    Exp  { Negate ($2, $1) }
+      | Exp TIMES Exp  { Times ($1, $3, $2) }
+      | Exp DIV   Exp  { Divide ($1, $3, $2) }
+\end{lstlisting}
+
+
+\subsection{Precedence}
+To ensure the operators have the precedence specified in the assignment text we've listed each of them in the precedence hierarchy in Parser.grm as follows: 
+\begin{lstlisting}
+    %nonassoc ifprec letprec
+    %left DEQ LTH
+    %left PLUS MINUS
+    %left TIMES DIV
+    %nonassoc NOT
+    %left OR
+    %left AND
+    %nonassoc NEGATE
+\end{lstlisting}
+This way Negate will bind the strongest, And will bind stronger than Or, Not will bind weaker than the logical comparisons and Times and Div will bind stronger than Plus and Minus.
 
 \subsection{And and Or}
 The most interesting of the operations here were the implementations of And and Or done in Interpreter.sml and CodeGen.sml
 which had to be done with short-circuiting:
 
 \noindent Example of And from Interpreter.sml:
-\begin{verbatim}
+\begin{lstlisting}
   | evalExp ( And(e1, e2,  pos), vtab, ftab ) =
         let val res1 = evalExp(e1, vtab, ftab)
         in case res1 of
               BoolVal true  => evalExp(e2, vtab, ftab)
            |  BoolVal false => BoolVal false
         end
-\end{verbatim}
+\end{lstlisting}
 
 \noindent Example of And from CodeGen.sml:
-\begin{verbatim}
-    | And (e1, e2, pos) =>
-        let val endLabel = newName "andend"
-            val code1 = compileExp e1 vtable place
+\begin{lstlisting}
+  | And (e1, e2, pos) =>
+        let val thenLabel = newName "andthen"
+            val elseLabel = newName "andelse"
+            val endLabel = newName "andend"
+            val code1 = compileCond e1 vtable thenLabel elseLabel
             val code2 = compileExp e2 vtable place
-        in code1 @ [ Mips.BEQ(place, "0", endLabel) ] @ code2 @ [Mips.LABEL endLabel]
+        in code1 @ [Mips.LABEL thenLabel] @ code2  @
+           [ Mips.J endLabel, Mips.LABEL elseLabel, Mips.LI (place,"0"), Mips.LABEL endLabel]
         end
-\end{verbatim}
+\end{lstlisting}
 
 \noindent We based this on the following assembly code (for And):
-\begin{verbatim}
+\begin{lstlisting}
     res_reg = checkexp1
     beq result,$0,end
     res_reg = checkexp2
     end
-\end{verbatim}
+\end{lstlisting}
 The idea is that if the first expression is false, the result will be false as well and if the first expression is true, the result will depend on (be equal to) the result of the second expression.\\
 \\
 Or was implemented similarly.
 \subsection{Negate and Not}
 We made Negate by compiling the expression and subtracting the resulting integer from 0.
-\begin{verbatim}
+\begin{lstlisting}
     | Negate (e, pos) =>
         let val t = newName "Negate_"
             val code = compileExp e vtable t
         in code @ [Mips.SUB (place,"0",t)]
         end
-\end{verbatim}
+\end{lstlisting}
 We Not by evaluating the boolean and xoring it with the integer 1.
-\begin{verbatim}
+\begin{lstlisting}
     | Not (e, pos) =>
         let val t = newName "not_"
             val code = compileExp e vtable t
         in code @ [Mips.XORI (place,t,"1")]
         end
-\end{verbatim}
+\end{lstlisting}
 
 \subsection{True and False}
 True and False were also a bit interesting as they are not operators, but constants.
 
 \noindent As Booleans do not exist in Assembly we implemented them using the integers 0 and 1.
-\begin{verbatim}
+\begin{lstlisting}
  | Constant (BoolVal b, pos) => 
      (case b of
          true    => [ Mips.LI (place,"1") ]
        | false   => [ Mips.LI (place,"0") ]
      )
-\end{verbatim}
+\end{lstlisting}
 
 We also added the appropriate cases for each operator in the type checker and interpreter, in most cases based on the existing functionality from Plus and Minus.
 See Appendixes ~\nameref{app:1type} and ~\nameref{app:1inter} for the full implementations.
@@ -180,14 +227,14 @@ The biggest challenge we encountered when implementing Filter and Scan was makin
 Implenteing Filter in CodeGen.sml was fairly straightforward. We used Map as inspiration and simply evaluated the function argument for each list element and only copied the element if the function call evaluated to true.\\
 
 \noindent This was our strategy for the structure of the loop:
-\begin{verbatim}
+\begin{lstlisting}
     condition
     beq condition,$0,dontcopy
     [copy code here]
     dontcopy:
     [increment here]
     j condition
-\end{verbatim}
+\end{lstlisting}
 We decided on this structure as it has as few jumps as we think is possible.
 
 \subsection{Scan}
@@ -208,25 +255,25 @@ See Appendix ~\nameref{app:scan} for the full implementation.
 
 \section{Task 3 - Lambda-expressions}
 In the type checker we added a case for anonymous functions in checkFunArg (line 368). As suggested in the comments we construct a FunDec, pass it to checkFunWithVtable and then construct a Lambda from the result. The rest of the case is similar to that of normal function arguments.\\
-\begin{verbatim}
+\begin{lstlisting}
   | checkFunArg (In.Lambda (ret_type, params, exp, funpos) , vtab, ftab, pos) =
             let val Out.FunDec (fname, ret_type, args, body, pos) = 
                     checkFunWithVtable (In.FunDec ("anon", ret_type, params, exp, funpos), vtab, ftab, pos)
                 val arg_types = map (fn (Param (_, ty)) => ty) args
                 in (Out.Lambda (ret_type, args, body, funpos), ret_type, arg_types)
             end
-\end{verbatim}
+\end{lstlisting}
 
 \noindent In the Interpreter we added a case to evalFunArg (line 514) and like in the type checker we construct a function declaration with a bogus name, and then pass it to callFunWithVtable.
 
-\begin{verbatim}
+\begin{lstlisting}
     | evalFunArg (Lambda (ret_type, args, body, funpos), vtab, ftab, callpos) =
             (fn aargs => callFunWithVtable (FunDec ("anon", ret_type, args, body, funpos), aargs, vtab, ftab, callpos), ret_type)
-\end{verbatim}
+\end{lstlisting}
 
 \noindent In CodeGen.sml our extra case is, again, similar to that of normal function parameters, with the addition of the code to get the arguments and compile the body of the function (which in the other case is already done) and the extra labels needed for this.
 
-\begin{verbatim}
+\begin{lstlisting}
     | applyFunArg (Lambda (ret_type, args, body, funpos), aargs, vtab, place, callpos) : Mips.Prog =
       let val tmp_reg = newName "tmp_reg"
           val funlabel = newName "anon_fun"
@@ -239,7 +286,7 @@ In the type checker we added a case for anonymous functions in checkFunArg (line
         @ compile_body
         @ [Mips.MOVE(place, fun_res)]
       end
-\end{verbatim}
+\end{lstlisting}
 
 \subsection{Tests}
 
@@ -248,33 +295,33 @@ In the type checker we added a case for anonymous functions in checkFunArg (line
 \section{Task 4 - ConstCopyPropFold}
 In the case of Var we take a look in the vtable and if we find a constant of propegatee we return that, else we return the variable as is.
 
-\begin{verbatim}
+\begin{lstlisting}
  | Var (name, pos) => ( case SymTab.lookup name vtable of
                        SOME (ConstProp x)        => Constant (x,pos) 
                      | SOME (VarProp proppedVar) => Var (proppedVar,pos)
                      | NONE                      => Var (name, pos)
        )
-\end{verbatim}
+\end{lstlisting}
 
 \noindent In the case of Let we call copyConstPropFoldExp on the expression recursively and then add it to our vtable if it's foldable (a constant or variable). At first we simply returned the current vtable if the expression was not foldable, but now we remove any older bindings to the same name to prevent shadowing.
 
-\begin{verbatim}
+\begin{lstlisting}
  | Let (Dec (name, e, decpos), body, pos) => 
    let val e' = copyConstPropFoldExp vtable e
        val vtable' =  case e' of
                        Constant (x,_)        => SymTab.bind name (ConstProp x) vtable 
                      | Var (x,_)             => SymTab.bind name (VarProp x) vtable
                      | _                     => SymTab.remove name vtable
-\end{verbatim}
+\end{lstlisting}
 
 \subsection{Shadowing}
 \noindent An example of shadowing:
 
-\begin{verbatim}
+\begin{lstlisting}
     let x = 5 in
     let x = f(x) in
     x * x
-\end{verbatim}
+\end{lstlisting}
 
 \noindent In this case x will be bound to our vtable as 5, then x = f(x) (if it cannot be folded) will remove the old binding of x and x*x cannot be folded. If we had not added the call to remove this expression would be folded to the constant 25, as x*x would find the first binding of x.
 
@@ -284,7 +331,7 @@ In the case of Var we take a look in the vtable and if we find a constant of pro
 
 \subsection{Task 1 - TypeChecker.sml}\label{app:1type}
 
-\begin{verbatim}
+\begin{lstlisting}
     | In.And (e1, e2, pos)
       => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Bool, e1, e2)
          in (Bool,
@@ -314,10 +361,10 @@ In the case of Var we take a look in the vtable and if we find a constant of pro
       => let val (_, e1_dec) = checkUnOp ftab vtab (pos, Bool, e1)
          in (Bool,
              Out.Not (e1_dec, pos))
-\end{verbatim}
+\end{lstlisting}
 
 \subsection{Task 1 - Interpreter.sml}\label{app:1inter}
-\begin{verbatim}
+\begin{lstlisting}
   | evalExp ( Not(e, pos), vtab, ftab ) =
         let val res   = evalExp(e, vtab, ftab)
         in  evalUnopBool(not, res, pos)
@@ -348,16 +395,16 @@ In the case of Var we take a look in the vtable and if we find a constant of pro
             val res2   = evalExp(e2, vtab, ftab)
         in  evalBinopNum(op Int.quot, res1, res2, pos)
         end
-\end{verbatim}
+\end{lstlisting}
 
 \subsection{Filter - CodeGen.sml}\label{app:scan}
-\begin{verbatim}
+\begin{lstlisting}
  | Filter (farg, arr_exp, elem_type, pos) =>      
       
      let val size_reg = newName "size_reg" (* size of input array *)
          val arr_reg  = newName "arr_reg" (* address of array *)
          val elem_reg = newName "elem_reg" (* address of single element *)
-         val res_reg = newName "res_reg" (* værdi fra input arr og resultat af funktionen *) 
+         val res_reg = newName "res_reg" (* vrdi fra input arr og resultat af funktionen *) 
          val arr_code = compileExp arr_exp vtable arr_reg
 
          val get_size = [ Mips.LW (size_reg, arr_reg, "0") ]
@@ -413,21 +460,21 @@ In the case of Var we take a look in the vtable and if we find a constant of pro
         @ loop_footer
         @ write_new_size
      end
-\end{verbatim}
+\end{lstlisting}
 \subsection{Scan - CodeGen.sml}\label{app:scan}
-\begin{verbatim}
+\begin{lstlisting}
  | Scan (farg, acc_exp, arr_exp, tp, pos) =>
      let val size_reg = newName "size_reg" (* size of input array *)
          val size_reg = newName "size_reg" (* size of output array *)
          val arr_reg  = newName "arr_reg" (* address of new array *)
          val elem_reg = newName "elem_reg" (* address of single element *)
-         val res_reg = newName "res_reg" (* værdi fra input arr og resultat af funktionen *)
-         val e_reg = newName "e_reg" (* vores udregnede værdi der skal bruges i næste iteration*)
+         val res_reg = newName "res_reg" (* vrdi fra input arr og resultat af funktionen *)
+         val e_reg = newName "e_reg" (* vores udregnede vrdi der skal bruges i nste iteration*)
          val arr_code = compileExp arr_exp vtable arr_reg    
-         val acc_code = compileExp acc_exp vtable e_reg      (* her udregner vi vores første e *)
+         val acc_code = compileExp acc_exp vtable e_reg      (* her udregner vi vores frste e *)
          
          val get_size = [ Mips.LW (size_reg, arr_reg, "0"),
-                          Mips.ADDI(size_reg,size_reg,"1") ] (* fordi det nye array er et element længere. *)
+                          Mips.ADDI(size_reg,size_reg,"1") ] (* fordi det nye array er et element lngere. *)
 
          val addr_reg = newName "addr_reg" (* address of element in new array *)
          val i_reg = newName "i_reg"
@@ -474,7 +521,7 @@ In the case of Var we take a look in the vtable and if we find a constant of pro
              , Mips.LABEL loop_end
              ]
      in arr_code
-        @ acc_code                       (* compile vores første e-element *)
+        @ acc_code                       (* compile vores frste e-element *)
         @ get_size
         @ dynalloc (size_reg, place, tp)
         @ init_regs
@@ -483,7 +530,7 @@ In the case of Var we take a look in the vtable and if we find a constant of pro
         @ loop_scan1
         @ loop_footer
      end	
-\end{verbatim}
+\end{lstlisting}
 
 
 
