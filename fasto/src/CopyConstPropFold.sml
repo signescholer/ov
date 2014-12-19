@@ -163,7 +163,6 @@ fun copyConstPropFoldExp vtable e =
         Apply (fname, map (copyConstPropFoldExp vtable) es, pos)
       | Let (Dec (name, e, decpos), body, pos) =>
 
-      
         (* DONE TODO TASK 4: This case currently does nothing.
 
          You must extend this case to expand the vtable' with whatever
