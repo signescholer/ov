@@ -32,6 +32,10 @@ structure CodeGen = struct
           val n = Int.toString (!counter)
       in "_" ^ reg_name ^ "_" ^ n ^ "_" end
 
+  fun zip [] [] = []
+       | zip (x::xs) (y::ys) = (x,y) :: zip xs ys
+       | zip _ _ = raise Error ("Unequal number of arguments.",(0,0))
+
   (* Number to text with "normal" sign symbol *)
   fun makeConst n = if n>=0 then Int.toString n
                     else "-" ^ Int.toString (~n)
@@ -867,32 +871,21 @@ structure CodeGen = struct
 
    A good solution is to transform the array comprehension to an
    expression using map and filter, then run compileExp on that. *)
-
-  and getArgs     []      vtable   _     = ([], vtable)
-    | getArgs (Param (v,_)::vs) vtable nextReg =
-             if nextReg > maxCaller
-             then raise Error ("Passing too many arguments!", (0,0))
-             else
-               let val vname = newName ("param_" ^ v)
-                   val vtable1 = SymTab.bind v vname vtable (*   (v,vname)::vtable   *)
-                   val (code2,vtable2) = getArgs vs vtable1 (nextReg + 1)
-               in ([Mips.MOVE (vname, makeConst nextReg)]
-                   @ code2, vtable2)
-               end
-   
+      
   and applyFunArg (FunName s, args, vtable, place, pos) : Mips.Prog =
       let val tmp_reg = newName "tmp_reg"
       in  applyRegs(s, args, tmp_reg, pos) @ [Mips.MOVE(place, tmp_reg)] end
     | applyFunArg (Lambda (ret_type, args, body, funpos), aargs, vtab, place, callpos) : Mips.Prog =
-      let val tmp_reg = newName "tmp_reg"
-          val funlabel = newName "anon_fun"
-          val fun_res = newName "anon_fun_res"
-          val (argcode, vtable_local) = getArgs args vtab minReg
-          val compile_body = compileExp body vtable_local fun_res
-          
-      in  applyRegs(funlabel, aargs, tmp_reg, callpos) @ [Mips.LABEL funlabel] @ argcode @ compile_body @ [Mips.MOVE(place, fun_res)] end
-
-     (* DONE TODO TASK 3:
+        let val fun_res = newName "fun_res" (* for the result *)
+            val arg_names = map (fn Param (n,t) => n) args
+            val zipped_list = zip arg_names aargs
+            val argtab = SymTab.fromList zipped_list
+            val vtab' = SymTab.combine vtab argtab
+            val fun_code = compileExp body vtab' fun_res            
+        in fun_code @ [Mips.MOVE(place, fun_res)]
+        end
+        
+      (* DONE TODO TASK 3:
         Add case for Lambda. This is very similar to how function definitions work.
         You need to bind the parameters of the Lambda to the registers in 'args',
         compile the body of the lambda,
