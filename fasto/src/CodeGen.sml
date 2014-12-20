@@ -32,9 +32,9 @@ structure CodeGen = struct
           val n = Int.toString (!counter)
       in "_" ^ reg_name ^ "_" ^ n ^ "_" end
 
-  fun zip [] [] = []
-       | zip (x::xs) (y::ys) = (x,y) :: zip xs ys
-       | zip _ _ = raise Error ("Unequal number of arguments.",(0,0))
+  fun zip [] [] _ = []
+       | zip (x::xs) (y::ys) pos = (x,y) :: zip xs ys pos
+       | zip _ _ pos = raise Error ("Unequal number of arguments.",pos)
 
   (* Number to text with "normal" sign symbol *)
   fun makeConst n = if n>=0 then Int.toString n
@@ -878,7 +878,7 @@ structure CodeGen = struct
     | applyFunArg (Lambda (ret_type, args, body, funpos), aargs, vtab, place, callpos) : Mips.Prog =
         let val fun_res = newName "fun_res" (* for the result *)
             val arg_names = map (fn Param (n,t) => n) args
-            val zipped_list = zip arg_names aargs
+            val zipped_list = zip arg_names aargs callpos
             val argtab = SymTab.fromList zipped_list
             val vtab' = SymTab.combine vtab argtab
             val fun_code = compileExp body vtab' fun_res            
