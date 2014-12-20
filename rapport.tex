@@ -36,13 +36,13 @@
 \newpage
 
 \section{Introduktion}
-This report covers extensions for the Fasto compiler as covered in the group assignment. We will go into detail with the parts of the tasks we found interesting and/or challenging and describe our solutions to them as well as including the relevant code. We'll also briefly discuss the tests we've performed.
+This report covers extensions for the \textbf{Fasto} compiler as covered in the group assignment. We will go into detail with the parts of the tasks we found interesting and/or challenging and describe our solutions to them as well as including the relevant code. We'll also briefly discuss the tests we've performed.
 
 \section{Task 1 - Extra operators}
 
-As described in the assignment we've extended the Fasto compiler with the new functionality listed below:\\
+As described in the assignment we've extended the \textbf{Fasto} compiler with the new functionality listed below:\\
 \\
-From Lexer.lex:\\
+From \textbf{Lexer.lex}:\\
 We've added "not", "true" and "false" to the listed keywords:
 \begin{lstlisting}
 fun keyword (s, pos) = case s of
@@ -51,7 +51,7 @@ fun keyword (s, pos) = case s of
        | "true"         => Parser.TRUE pos
        | "false"        => Parser.FALSE pos       
 \end{lstlisting}
-\noindent And added Times, Div, And, Or and Negate to the parsed tokens:
+\noindent And added \textit{Times}, \textit{Div}, \textit{And}, \textit{Or} and \textit{Negate} to the parsed tokens:
 \begin{lstlisting}
 rule Token = parse
 ...
@@ -62,8 +62,8 @@ rule Token = parse
   | `~`                 { Parser.NEGATE  (getPos lexbuf) }
 \end{lstlisting}
 
-\noindent From Parser.grm:\\
-\noindent We've added a case for each of the new operators and the two constants in the Expression declaration.
+\noindent From \textbf{Parser.grm}:\\
+\noindent We've added a case for each of the new operators and the two constants in the expression declaration.
 \begin{lstlisting}
 Exp :
 ...
@@ -79,7 +79,7 @@ Exp :
 \end{lstlisting}
 
 \subsection{Precedence}
-To ensure the operators have the precedence specified in the assignment text we've listed each of them in the precedence hierarchy in Parser.grm as follows: 
+To ensure the operators have the precedence specified in the assignment text we've listed each of them in the precedence hierarchy in \textbf{Parser.grm} as follows: 
 \begin{lstlisting}
 %nonassoc ifprec letprec
 %left DEQ LTH
@@ -90,13 +90,12 @@ To ensure the operators have the precedence specified in the assignment text we'
 %left AND
 %nonassoc NEGATE
 \end{lstlisting}
-This way Negate will bind the strongest, And will bind stronger than Or, Not will bind weaker than the logical comparisons and Times and Div will bind stronger than Plus and Minus.
+This way \textit{Negate} will bind the strongest, \textit{And} will bind stronger than \textit{Or}, \textit{Not} will bind weaker than the logical comparisons and \textit{Times} and \textit{Div} will bind stronger than \textit{Plus} and \textit{Minus}.
 
 \subsection{And and Or}
-The most interesting of the operations here were the implementations of And and Or done in Interpreter.sml and CodeGen.sml
-which had to be done with short-circuiting:
+The most interesting of the operations here were the implementations of \textit{And} and \textit{Or} done in \textbf{Interpreter.sml} and \textbf{CodeGen.sml} which had to be done with short-circuiting:
 
-\noindent Example of And from Interpreter.sml:
+\noindent Example of \textit{And} from \textbf{Interpreter.sml}:
 \begin{lstlisting}
 | evalExp ( And(e1, e2,  pos), vtab, ftab ) =
       let val res1 = evalExp(e1, vtab, ftab)
@@ -106,7 +105,7 @@ which had to be done with short-circuiting:
       end
 \end{lstlisting}
 
-\noindent Example of And from CodeGen.sml:
+\noindent Example of \textit{And} from \textbf{CodeGen.sml}:
 \begin{lstlisting}
 | And (e1, e2, pos) =>
       let val thenLabel = newName "andthen"
@@ -118,11 +117,11 @@ which had to be done with short-circuiting:
          [ Mips.J endLabel, Mips.LABEL elseLabel, Mips.LI (place,"0"), Mips.LABEL endLabel]
       end
 \end{lstlisting}
-\noindent As suggested we used compileCond to save jumps.
+\noindent As suggested we used \textit{compileCond} to save jumps.
 \\
-Or was implemented similarly.
+\textit{Or} was implemented similarly.
 \subsection{Negate and Not}
-We made Negate by compiling the expression and subtracting the resulting integer from 0.
+We made \textit{Negate} by compiling the expression and subtracting the resulting integer from 0.
 \begin{lstlisting}
 | Negate (e, pos) =>
     let val t = newName "Negate_"
@@ -130,7 +129,7 @@ We made Negate by compiling the expression and subtracting the resulting integer
     in code @ [Mips.SUB (place,"0",t)]
     end
 \end{lstlisting}
-We Not by evaluating the boolean and xoring it with the integer 1.
+We made \textit{Not} by evaluating the boolean and xoring it with the integer 1.
 \begin{lstlisting}
 | Not (e, pos) =>
     let val t = newName "not_"
@@ -140,9 +139,9 @@ We Not by evaluating the boolean and xoring it with the integer 1.
 \end{lstlisting}
 
 \subsection{True and False}
-True and False were also a bit interesting as they are not operators, but constants.
+\textit{True} and \textit{False} were also a bit interesting as they are not operators, but constants.
 
-\noindent As Booleans do not exist in Assembly we implemented them using the integers 0 and 1.
+\noindent As \textit{Booleans} do not exist in \textbf{Assembly} we implemented them using the integers 0 and 1.
 \begin{lstlisting}
 | Constant (BoolVal b, pos) => 
     (case b of
@@ -151,12 +150,12 @@ True and False were also a bit interesting as they are not operators, but consta
     )
 \end{lstlisting}
 
-We also added the appropriate cases for each operator in the type checker and interpreter, in most cases based on the existing functionality from Plus and Minus.
+We also added the appropriate cases for each operator in the type checker and interpreter, in most cases based on the existing functionality from \textit{Plus} and \textit{Minus}.
 See Appendixes ~\nameref{app:1type} and ~\nameref{app:1inter} for the full implementations.
 
 \subsection{Tests}
 
-All the tests that came with Fasto runs with the desired result, taking into consideration that we haven't implemented Task 5.\\
+All the tests that came with \textbf{Fasto} run with the desired results, taking into consideration that we haven't implemented \textbf{Task 5}.\\
 We have also made a series of tests ourselves:
 \\
 Mult: (mult.fo)\\
@@ -193,10 +192,10 @@ Negate: (neg\_simple.fo)\\
 
 \section{Task 2 - Filter and Scan}
 
-We implemented Filter and Scan in the CodeGenerator. For each function we'll show the code here and then give a line by line explanation of our code.
+We implemented \textit{Filter} and \textit{Scan} in the \textbf{CodeGenerator}. For each function we'll show the code here and then give a line by line explanation of our code.
 
 \subsection{Filter}
-Implenteing Filter in CodeGen.sml was fairly straightforward. We used Map as inspiration and simply evaluated the function argument for each list element and only copied the element to the new array if the function call evaluated to true.\\
+Implenteing \textit{Filter} in \textbf{CodeGen.sml} was fairly straightforward. We used \textit{Map} as inspiration and simply evaluated the function argument for each list element and only copied the element to the new array if the function call evaluated to true.\\
 
 \begin{lstlisting}
 fun compileExp e vtable place = case e of
@@ -268,12 +267,12 @@ The loop footer (48-51) increments the loop counter and jumps back to the condit
 Lastly the size of the new array is written in \textit{place}, which is the first word of the new array. 
 
 \subsection{Scan}
-Again we used Map for inspiration. We first tried using Reduce, as suggested in the comments, but since we already had a good understanding of Map it worked out better when using this.\\
+Again we used \textit{Map} for inspiration. We first tried using \textit{Reduce}, as suggested in the comments, but since we already had a good understanding of \textit{Map} it worked out better when using this.\\
 
 \begin{lstlisting}
 fun compileExp e vtable place = case e of
 ...
- | Scan (farg, acc_exp, arr_exp, tp, pos) =>
+| Scan (farg, acc_exp, arr_exp, tp, pos) =>
 let val size_reg = newName "size_reg" 
     val size_reg = newName "size_reg" 
     val arr_reg  = newName "arr_reg"
@@ -337,17 +336,21 @@ in arr_code
    @ loop_footer
 end	
 \end{lstlisting}
-
-\noindent FIXME PUT AN EXPLANATION OF SCAN HERE.
+\noindent Lines 4 through 31 initialize the necessary registers. Line 10 and 11 compile the passed array and base element expressions. In \textit{init\_regs} the base element is copied to the first element of the new array.\\
+The loop header (32-34) is similar to that of Filter. The loop body (35-44) loads the element from the old array, calls the passed function with this and the saved base element, increments the proper registers and saves the function result in both the new array (25-27) and as the new base element value (39).\\
+Lines 55-64 structure the code (and calls dynalloc to allocate memory for the new array.)
 
 \subsection{Tests}
-
-FIXME Put in some tests here. I don't know what they are, but they don't need to be complete.
+Scan.fo\\
+Runs as expected.\\
+\\
+Filter.fo\\
+Runs as expected.\\
 
 \newpage
 
 \section{Task 3 - Lambda-expressions}
-In the type checker we added a case for anonymous functions in checkFunArg (line 368). As suggested in the comments we construct a FunDec, pass it to checkFunWithVtable and then construct a Lambda from the result. The rest of the case is similar to that of normal function arguments.
+In the type checker we added a case for anonymous functions in \textit{checkFunArg} (line 368). As suggested in the comments we construct a \textit{FunDec}, pass it to \textit{checkFunWithVtable} and then construct a \textit{Lambda} from the result. The rest of the case is similar to that of normal function arguments.
 \begin{lstlisting}
 and checkFunArg (In.FunName fname, vtab, ftab, pos) =
 ...
@@ -360,9 +363,9 @@ and checkFunArg (In.FunName fname, vtab, ftab, pos) =
               ret_type, arg_types)
       end
 \end{lstlisting}
-\noindent The interesting part happens in line 6 where we construct a function declaration with a bogus name and call CheckFunWithVtable, line 7 where we strip the parameter list to get their types and line 8 where we construct an Out.Lambda and return it along with return and argument types.\\
+\noindent The interesting part happens in line 6 where we construct a function declaration with a bogus name and call \textit{CheckFunWithVtable}, line 7 where we strip the parameter list to get their types and line 8 where we construct an \textit{Out.Lambda} and return it along with return and argument types.\\
 \\
-\noindent In the Interpreter we added a case to evalFunArg (line 514) and like in the type checker we construct a function declaration with a bogus name, and then pass it to callFunWithVtable.
+\noindent In the \textbf{Interpreter} we added a case to \textit{evalFunArg} (line 514) and like in the type checker we construct a function declaration with a bogus name, and then pass it to \textit{callFunWithVtable}.
 \begin{lstlisting}
 and evalFunArg (FunName fid, vtab, ftab, callpos) =
 ...
@@ -373,9 +376,9 @@ and evalFunArg (FunName fid, vtab, ftab, callpos) =
                  FunDec ("anon", ret_type, args, body, funpos),
                  aargs, vtab, ftab, callpos), ret_type)
 \end{lstlisting}
-\noindent Again the interesting part happens in line 6 where we call callFunWithVtable and pass it a constructed function declaration and the existing vtable.\\
+\noindent Again the interesting part happens in line 6 where we call \textit{callFunWithVtable} and pass it a constructed function declaration and the existing vtable.\\
 \\
-\noindent In CodeGen.sml our extra case handles adding the actual arguments to the existing vtable and then inlining the code by compiling it in place with the new modified vtable and moving the resulting value to \textit{place} where it belongs.
+\noindent In \textbf{CodeGen.sml} our extra case handles adding the actual arguments to the existing \textit{vtable} and then inlining the code by compiling it in place with the new modified \textit{vtable} and moving the resulting value to \textit{place} where it belongs.
 
 \begin{lstlisting}
 and applyFunArg (FunName s, ... ) : Mips.Prog =
@@ -391,9 +394,9 @@ and applyFunArg (FunName s, ... ) : Mips.Prog =
      in fun_code @ [Mips.MOVE(place, fun_res)]
      end
 \end{lstlisting}
-\noindent We have added a small helper-function named zip to easily combine the argument names with the passed argument values in order to combine them with the existing vtable. It simply takes a list of formal argument names, matches it up with a list of symbolic registers containing the actual arguments and returns a list of tuples with the pairs.\\
+\noindent We have added a small helper-function named zip to easily combine the argument names with the passed argument values in order to combine them with the existing \textit{vtable}. It simply takes a list of formal argument names, matches it up with a list of symbolic registers containing the actual arguments and returns a list of tuples with the pairs.\\
 \\
-\noindent In line 5 we make a new register for the function result. In line 6-9 we make the list of parameters and add them to the existing vtable. In line 10 we compile the actual body of the function and let i place the result in fun\_res and in line 11 we call the body-compilation and then move the result into \textit{place}.
+\noindent In line 5 we make a new register for the function result. In line 6-9 we make the list of parameters and add them to the existing \textit{vtable}. In line 10 we compile the actual body of the function and let i place the result in \textit{fun\_res} and in line 11 we call the body-compilation and then move the result into \textit{place}.
 
 \subsection{Tests}
 
@@ -407,7 +410,7 @@ fun [int] main() =
 	in let b = map(fn int (int y) => write(x + y), a) 
 	in (b)
 \end{lstlisting}
-\noindent The original program attempted to pass Write a list of integers, which is not possible, so we have moved the call to write into the anonymous function in line 5 and changed the return type of main from [char] to [int] to accommodate the new return value.\\
+\noindent The original program attempted to pass \textit{Write} a list of integers, which is not possible, so we have moved the call to write into the anonymous function in line 5 and changed the return type of main from \textbf{[char]} to \textbf{[int]} to accommodate the new return value.\\
 The test runs as expected.
 
 \newpage
@@ -418,7 +421,7 @@ We have edited two cases to the switch-case of
 fun copyConstPropFoldExp vtable e =
 \end{lstlisting}
 to implement the intended behaviour of constant folding and copy propagation when it comes to variables and values defined in let-clauses.\\
-In the case of Var we take a look in the vtable and if we find a constant of propegatee we return that, else we return the variable as is.\\
+In the case of \textit{Var} we take a look in the \textit{vtable} and if we find a constant of propegatee we return that, else we return the variable as is.\\
 \begin{lstlisting}
 | Var (name, pos) => ( case SymTab.lookup name vtable of
                       SOME (ConstProp x)        => Constant (x,pos) 
@@ -427,7 +430,7 @@ In the case of Var we take a look in the vtable and if we find a constant of pro
       )
 \end{lstlisting}
 
-\noindent In the case of Let we call copyConstPropFoldExp on the expression recursively and then add it to our vtable if it's foldable (can be reduced to a constant or variable). At first we simply returned the current vtable if the expression was not foldable, but now we remove any older bindings to the same name to prevent shadowing.
+\noindent In the case of \textit{Let} we call \textit{copyConstPropFoldExp} on the expression recursively and then add it to our \textit{vtable} if it is foldable (can be reduced to a constant or variable). At first we simply returned the current \textit{vtable} if the expression was not foldable, but now we remove any older bindings to the same name to prevent shadowing.
 
 \begin{lstlisting}
 | Let (Dec (name, e, decpos), body, pos) => 
@@ -447,13 +450,54 @@ let x = f(x) in
 x * x
 \end{lstlisting}
 
-\noindent In this case x will be bound to our vtable as 5, then x = f(x) (if it cannot be folded) will remove the old binding of x and x*x cannot be folded. If we had not added the call to remove this expression would be folded to the constant 25, as x*x would find the first binding of x.\\
+\noindent In this case \textbf{x} will be bound to our vtable as 5, then x = f(x) (if it cannot be folded) will remove the old binding of \textbf{x} and \textbf{x}*\textbf{x} cannot be folded. If we had not added the call to remove this expression would be folded to the constant 25, as \textbf{x}*\textbf{x} would find the first binding of \textbf{x}.\\
 \\
 We have not found a solution to the example of shadowing shown in the assignment text.
 
 \subsection{Tests}
+CopyConstProFold.fo
+\begin{lstlisting}
+fun int main() =
+let a = 3 in
+let b = a in
+write (b)
+\end{lstlisting}
+\noindent Should be (and is) optimized to
+\begin{lstlisting}
+fun int main() = write (3)
+\end{lstlisting}
+CopyConstProFold2.fo\\
+Test with function calls.\\
+Runs as expected.\\
+\\
+CopyConstProFoldEqual.fo\\
+\begin{lstlisting}
+fun [char] main () = 
+    let a = read(int) in
+    let b = read(int) in
+    if a == b then write("They are equal.") else write ("They are not equal.")
+\end{lstlisting}
+This test runs as exbected, but:\\
+\begin{lstlisting}
+fun copyConstPropFoldExp vtable e = case e of
+...
+    | Equal (e1, e2, pos) =>
+  let val e1' = copyConstPropFoldExp vtable e1
+      val e2' = copyConstPropFoldExp vtable e2
+  in case (e1', e2') of
+         (Constant v1, Constant v2) =>
+         Constant (BoolVal (v1 = v2), pos)
+       | _ => if e1' = e2'
+              then Constant (BoolVal true, pos)
+              else Equal (e1', e2', pos)
+  end
+\end{lstlisting}
+It has been brought to Cosmins attention that checking whether the constant values in this snippet are equal will never evaluate to \textit{True} as the function compares the two constants including their positions, which will always differ.\\
+We have not have time to test the following theory, but seeing that each expression also carries a position, it is apparent that the equality check in line 9 will also never evaluate to \textit{True}, for the same reason.\\
+We also believe that if we, as Cosmin suggests, get rid of the positions in the comparison, another bug will show.
+Consider the test described above: The expressions \textbf{a} and \textbf{b} are identical and so they would be considered equal if not for their respective positions, and therefore they would be replaced by a \textit{True} boolean value in line 4 of the test, which is obviously wrong as the user might input two different integers. The same would happen with equal expressions containing the function \textit{Write}, where the optimization would also change the behaviour of the program.
 
-FIXME Add the test
+\newpage
 
 \section{Appendices}
 
@@ -527,8 +571,4 @@ fun evalExp ...
         in  evalBinopNum(op Int.quot, res1, res2, pos)
         end
 \end{lstlisting}
-
-
-
-
 \end{document}
