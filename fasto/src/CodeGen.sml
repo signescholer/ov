@@ -34,7 +34,7 @@ structure CodeGen = struct
 
   fun zip [] [] _ = []
        | zip (x::xs) (y::ys) pos = (x,y) :: zip xs ys pos
-       | zip _ _ pos = raise Error ("Unequal number of arguments.",pos)
+       | zip _ _ pos = raise Error ("Unequal number of formal and actual arguments.",pos)
 
   (* Number to text with "normal" sign symbol *)
   fun makeConst n = if n>=0 then Int.toString n
