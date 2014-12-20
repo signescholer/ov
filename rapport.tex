@@ -45,8 +45,7 @@ As described in the assignment we've extended the Fasto compiler with the new fu
 From Lexer.lex:\\
 We've added "not", "true" and "false" to the listed keywords:
 \begin{lstlisting}
- fun keyword (s, pos) =
-     case s of
+fun keyword (s, pos) = case s of
 ...
        | "not"          => Parser.NOT pos
        | "true"         => Parser.TRUE pos
@@ -63,33 +62,33 @@ rule Token = parse
   | `~`                 { Parser.NEGATE  (getPos lexbuf) }
 \end{lstlisting}
 
-From Parser.grm:\\
+\noindent From Parser.grm:\\
 \noindent We've added a case for each of the new operators and the two constants in the Expression declaration.
 \begin{lstlisting}
-    Exp :
+Exp :
 ...
-      | TRUE           { Constant (BoolVal (true), $1) }
-      | FALSE          { Constant (BoolVal (false), $1) }
+ | TRUE           { Constant (BoolVal (true), $1) }
+ | FALSE          { Constant (BoolVal (false), $1) }
 ...
-      | Exp AND   Exp  { And ($1, $3, $2) }
-      | Exp OR    Exp  { Or ($1, $3, $2) }
-      | NOT       Exp  { Not ($2, $1) }
-      | NEGATE    Exp  { Negate ($2, $1) }
-      | Exp TIMES Exp  { Times ($1, $3, $2) }
-      | Exp DIV   Exp  { Divide ($1, $3, $2) }
+ | Exp AND   Exp  { And ($1, $3, $2) }
+ | Exp OR    Exp  { Or ($1, $3, $2) }
+ | NOT       Exp  { Not ($2, $1) }
+ | NEGATE    Exp  { Negate ($2, $1) }
+ | Exp TIMES Exp  { Times ($1, $3, $2) }
+ | Exp DIV   Exp  { Divide ($1, $3, $2) }
 \end{lstlisting}
 
 \subsection{Precedence}
 To ensure the operators have the precedence specified in the assignment text we've listed each of them in the precedence hierarchy in Parser.grm as follows: 
 \begin{lstlisting}
-    %nonassoc ifprec letprec
-    %left DEQ LTH
-    %left PLUS MINUS
-    %left TIMES DIV
-    %nonassoc NOT
-    %left OR
-    %left AND
-    %nonassoc NEGATE
+%nonassoc ifprec letprec
+%left DEQ LTH
+%left PLUS MINUS
+%left TIMES DIV
+%nonassoc NOT
+%left OR
+%left AND
+%nonassoc NEGATE
 \end{lstlisting}
 This way Negate will bind the strongest, And will bind stronger than Or, Not will bind weaker than the logical comparisons and Times and Div will bind stronger than Plus and Minus.
 
@@ -99,25 +98,25 @@ which had to be done with short-circuiting:
 
 \noindent Example of And from Interpreter.sml:
 \begin{lstlisting}
-  | evalExp ( And(e1, e2,  pos), vtab, ftab ) =
-        let val res1 = evalExp(e1, vtab, ftab)
-        in case res1 of
-              BoolVal true  => evalExp(e2, vtab, ftab)
-           |  BoolVal false => BoolVal false
-        end
+| evalExp ( And(e1, e2,  pos), vtab, ftab ) =
+      let val res1 = evalExp(e1, vtab, ftab)
+      in case res1 of
+            BoolVal true  => evalExp(e2, vtab, ftab)
+         |  BoolVal false => BoolVal false
+      end
 \end{lstlisting}
 
 \noindent Example of And from CodeGen.sml:
 \begin{lstlisting}
-  | And (e1, e2, pos) =>
-        let val thenLabel = newName "andthen"
-            val elseLabel = newName "andelse"
-            val endLabel = newName "andend"
-            val code1 = compileCond e1 vtable thenLabel elseLabel
-            val code2 = compileExp e2 vtable place
-        in code1 @ [Mips.LABEL thenLabel] @ code2  @
-           [ Mips.J endLabel, Mips.LABEL elseLabel, Mips.LI (place,"0"), Mips.LABEL endLabel]
-        end
+| And (e1, e2, pos) =>
+      let val thenLabel = newName "andthen"
+          val elseLabel = newName "andelse"
+          val endLabel = newName "andend"
+          val code1 = compileCond e1 vtable thenLabel elseLabel
+          val code2 = compileExp e2 vtable place
+      in code1 @ [Mips.LABEL thenLabel] @ code2  @
+         [ Mips.J endLabel, Mips.LABEL elseLabel, Mips.LI (place,"0"), Mips.LABEL endLabel]
+      end
 \end{lstlisting}
 \noindent As suggested we used compileCond to save jumps.
 \\
@@ -125,19 +124,19 @@ Or was implemented similarly.
 \subsection{Negate and Not}
 We made Negate by compiling the expression and subtracting the resulting integer from 0.
 \begin{lstlisting}
-    | Negate (e, pos) =>
-        let val t = newName "Negate_"
-            val code = compileExp e vtable t
-        in code @ [Mips.SUB (place,"0",t)]
-        end
+| Negate (e, pos) =>
+    let val t = newName "Negate_"
+        val code = compileExp e vtable t
+    in code @ [Mips.SUB (place,"0",t)]
+    end
 \end{lstlisting}
 We Not by evaluating the boolean and xoring it with the integer 1.
 \begin{lstlisting}
-    | Not (e, pos) =>
-        let val t = newName "not_"
-            val code = compileExp e vtable t
-        in code @ [Mips.XORI (place,t,"1")]
-        end
+| Not (e, pos) =>
+    let val t = newName "not_"
+        val code = compileExp e vtable t
+    in code @ [Mips.XORI (place,t,"1")]
+    end
 \end{lstlisting}
 
 \subsection{True and False}
@@ -145,11 +144,11 @@ True and False were also a bit interesting as they are not operators, but consta
 
 \noindent As Booleans do not exist in Assembly we implemented them using the integers 0 and 1.
 \begin{lstlisting}
- | Constant (BoolVal b, pos) => 
-     (case b of
-         true    => [ Mips.LI (place,"1") ]
-       | false   => [ Mips.LI (place,"0") ]
-     )
+| Constant (BoolVal b, pos) => 
+    (case b of
+        true    => [ Mips.LI (place,"1") ]
+      | false   => [ Mips.LI (place,"0") ]
+    )
 \end{lstlisting}
 
 We also added the appropriate cases for each operator in the type checker and interpreter, in most cases based on the existing functionality from Plus and Minus.
@@ -157,130 +156,244 @@ See Appendixes ~\nameref{app:1type} and ~\nameref{app:1inter} for the full imple
 
 \subsection{Tests}
 
-All the tests that came with Fasto runs with the desired result, considering we haven't implementet assignment 5.\\
-When running fasto with -i:\\
+All the tests that came with Fasto runs with the desired result, taking into consideration that we haven't implemented Task 5.\\
+We have also made a series of tests ourselves:
 \\
 Mult: (mult.fo)\\
-The function returns an int when getting two integers as input.\\
-It gives an interpreter error on chars, strings and booleans.\\
+-i: The function returns an int when getting two integers as input. It gives an interpreter error on chars, strings and booleans.\\
+-c: The function returns an int when getting two integers as input. It gives an error when running in Mars with any other input.\\
 \\
 Div: (div.fo)\\
-The function returns an int when getting two integers as input, except when dividing with 0 when it returns and error.\\
-It gives an interpreter error on chars, strings and booleans.\\
+-i: The function returns an int when getting two integers as input, except when dividing with 0 when it returns and error. It gives an interpreter error on chars, strings and booleans.\\
+-c: Returns the value of two integers divided. Returns an error on division by 0 and chars, and strings.\\
 \\
 And: (And.fo, AndFail.fo)\\
-Returns the correct boolean values depending on input, and returns an interpreter error on chars, strings.\\
-\\
-Or: (Or.fo)\\
-Returns the correct boolean values depending on input, and returns an interpreter error on chars, strings.\\
-\\
-AndOr: (AndOr.fo)\\
-The function returns a string containing the text \textit{This is the correct result.} by using And and Or on booleans. It shows that the operators work.\\
-\\
-Not: (Not.fo)\\
-Returns the correct boolean values depending on input, and returns an interpreter error on chars, strings.\\
-\\
-Negate: (neg\_simple.fo)\\
-Returns the correct boolean values.\\
-\\
-True
-When running with -c:\\
-\\
-Mult:\\
-The function returns an int when getting two integers as input.\\
-It gives an error when running in mars with any other input.\\
-\\
-Div:\\
-Returns the value of two integers divided. Returns an error on division by 0 and chars, and strings.\\
-\\
-And:\\
-Returns the true or false depending on the input values(0 or 1), on all other input it returns an error.\\
+-i: Returns the correct boolean values depending on input, and returns an interpreter error on chars, strings.\\
+-c: Returns the true or false depending on the input values(0 or 1), on all other input it returns an error.\\
 \\
 AndFail:\\
-Tries to use And on input 000 and 00. Returns an error.\\
+-c: Tries to use And on input 000 and 00. Returns an error.\\
 \\
-Or:\\
-Returns the true or false depending on the input values(0 or 1), on all other input it returns an error.\\
+Or: (Or.fo)\\
+-i: Returns the correct boolean values depending on input, and returns an interpreter error on chars, strings.\\
+-c: Returns the true or false depending on the input values(0 or 1), on all other input it returns an error.\\
 \\
-AndOr:\\
-The function returns a string containing the text \textit{This is the correct result.} by using And and Or on booleans. It shows that the operators work.\\
+AndOr: (AndOr.fo)\\
+-i: The function returns a string containing the text \textit{This is the correct result.} by using And and Or on booleans. It shows that the operators work.\\
+-c: The function returns a string containing the text \textit{This is the correct result.} by using And and Or on booleans. It shows that the operators work.\\
 \\
-Not:\\
-Returns the true on false and false on true and all other integers. It returns an error on chars and strings.\\
+Not: (Not.fo)\\
+-i: Returns the correct boolean values depending on input, and returns an interpreter error on chars, strings.\\
+-c: Returns the true on false and false on true and all other integers. It returns an error on chars and strings.\\
 \\
-Negate:\\
-Returns the correct boolean values.
+Negate: (neg\_simple.fo)\\
+-i -c: Returns the negated integer values.\\
 
 \newpage
 
 \section{Task 2 - Filter and Scan}
 
-The biggest challenge we encountered when implementing Filter and Scan was making sense of the variable names already used in CodeGen.sml. It took some time to find out which of the pointers (arr\_reg, addr\_reg, res\_reg, elem\_reg) pointed to what.
+We implemented Filter and Scan in the CodeGenerator. For each function we'll show the code here and then give a line by line explanation of our code.
 
 \subsection{Filter}
-Implenteing Filter in CodeGen.sml was fairly straightforward. We used Map as inspiration and simply evaluated the function argument for each list element and only copied the element if the function call evaluated to true.\\
+Implenteing Filter in CodeGen.sml was fairly straightforward. We used Map as inspiration and simply evaluated the function argument for each list element and only copied the element to the new array if the function call evaluated to true.\\
 
-\noindent This was our strategy for the structure of the loop:
 \begin{lstlisting}
-    condition
-    beq condition,$0,dontcopy
-    [copy code here]
-    dontcopy:
-    [increment here]
-    j condition
+fun compileExp e vtable place = case e of
+...
+| Filter (farg, arr_exp, elem_type, pos) =>      
+let val size_reg = newName "size_reg"
+    val arr_reg  = newName "arr_reg"
+    val elem_reg = newName "elem_reg"
+    val res_reg  = newName "res_reg"
+    val arr_code = compileExp arr_exp vtable arr_reg
+    val get_size = [ Mips.LW (size_reg, arr_reg, "0") ]
+    val addr_reg = newName "addr_reg"
+    val i_reg = newName "i_reg"
+    val new_counter = newName "zc"
+    val init_regs = [ Mips.ADDI (addr_reg, place, "4")
+                    , Mips.MOVE (i_reg, "0")
+                    , Mips.ADDI (elem_reg, arr_reg, "4") ]
+    val loop_beg = newName "loop_beg"
+    val loop_end = newName "loop_end"
+    val tmp_reg = newName "tmp_reg"
+    val loop_header = [ Mips.LABEL (loop_beg)
+                      , Mips.SUB (tmp_reg, i_reg, size_reg)
+                      , Mips.BGEZ (tmp_reg, loop_end) ]
+    val loop_map0 =
+        let val crlabel = newName "cond_result"
+            val code0 = case getElemSize elem_type of
+                One => [ Mips.LB(res_reg, elem_reg, "0") ]
+              | Four => [ Mips.LW(res_reg, elem_reg, "0") ]
+            val code1 = applyFunArg(farg, [res_reg], vtable, crlabel, pos)
+            val dontCopyLabel = newName "increment"
+            val copycode = case getElemSize elem_type of
+                One => [ Mips.SB(res_reg, addr_reg, "0") ]
+                     @ [ Mips.ADDI(addr_reg, addr_reg, "1"),
+                         Mips.ADDI(new_counter,new_counter,"1")]
+              | Four => [ Mips.SW(res_reg, addr_reg, "0") ]
+                     @ [ Mips.ADDI(addr_reg, addr_reg, "4"),
+                         Mips.ADDI(new_counter,new_counter,"1") ]
+            val incrementcode = case getElemSize elem_type of
+                One => Mips.ADDI (elem_reg, elem_reg, "1")
+              | Four => Mips.ADDI (elem_reg, elem_reg, "4")
+        in    
+            code0
+          @ code1
+          @ [Mips.BEQ (crlabel,"0",dontCopyLabel)]
+          @ copycode
+          @ [Mips.LABEL dontCopyLabel,incrementcode]
+        end
+    val write_new_size =
+        [ Mips.SW (new_counter,place,"0") ]
+    val loop_footer =
+        [ Mips.ADDI (i_reg, i_reg, "1")
+        , Mips.J loop_beg
+        , Mips.LABEL loop_end]
+in arr_code
+   @ get_size
+   @ dynalloc (size_reg, place, elem_type)
+   @ init_regs
+   @ loop_header
+   @ loop_map0
+   @ loop_footer
+   @ write_new_size
+end
 \end{lstlisting}
-We decided on this structure as it has as few jumps as we think is possible.
+
+Line 4 through 18 initialize the needed temporary registers, line 8 compiles the array-expression and 9 loads the first word of the compiled array to get its size. \textit{elem\_reg} and \textit{addr\_reg} are set to point to the first element in each of the two arrays.\\
+Line 19-21 contain the loop header, a label and a conditional branch testing whether our counter has reached the size of the array.\\
+Line 22-45 contain the body of the loop itself, first loading the value from the old array (24-26) then calling our function argument with the loaded value (27). Line 42 then makes sure we only copy the appropriate elements by checking the returned boolean value and skipping the copying code, which also increments a size-counter for the new array (29-35), when needed and then incrementing the pointer to the old array (36-38).\\
+The loop footer (48-51) increments the loop counter and jumps back to the condition of the loop.\\
+Lastly the size of the new array is written in \textit{place}, which is the first word of the new array. 
 
 \subsection{Scan}
 Again we used Map for inspiration. We first tried using Reduce, as suggested in the comments, but since we already had a good understanding of Map it worked out better when using this.\\
 
-\noindent Of course we had to make some additions to the functionality of Map.\\\\
-Here is our strategy for Scan:\\
-First we add one to the size of the new array (as the output array will always be one element longer than the input),\\
-then we evaluate our base element and copy it to the first slot in the new array as well as saving the value in a temporary register.\\
-We then enter the loop where we call the passed function with our temporary base value and the first element in the input array as parameters, save the result to the temporary base value register and copy it to the new array.\\
-And repeat until we run out of elements.\\
-See Appendix ~\nameref{app:scan} for the full implementation.
+\begin{lstlisting}
+fun compileExp e vtable place = case e of
+...
+ | Scan (farg, acc_exp, arr_exp, tp, pos) =>
+let val size_reg = newName "size_reg" 
+    val size_reg = newName "size_reg" 
+    val arr_reg  = newName "arr_reg"
+    val elem_reg = newName "elem_reg" 
+    val res_reg  = newName "res_reg"
+    val e_reg    = newName "e_reg"
+    val arr_code = compileExp arr_exp vtable arr_reg    
+    val acc_code = compileExp acc_exp vtable e_reg
+    val get_size = [ Mips.LW (size_reg, arr_reg, "0"),
+                     Mips.ADDI(size_reg,size_reg,"1") ]
+    val addr_reg = newName "addr_reg"
+    val i_reg = newName "i_reg"
+    val init_regs = 
+    		let
+              val first_elem = case getElemSize tp of
+                  One =>  [ Mips.SB (e_reg, addr_reg, "0"), 
+                            Mips.ADDI (addr_reg, addr_reg, "1") ]
+                | Four => [ Mips.SW (e_reg, addr_reg, "0"),
+                            Mips.ADDI (addr_reg, addr_reg, "4") ]
+            in
+                [ Mips.ADDI (addr_reg, place, "4") ]
+              @ first_elem
+              @ [ Mips.MOVE (i_reg, "0")
+                , Mips.ADDI (elem_reg, arr_reg, "4") ]
+            end
+    val loop_beg = newName "loop_beg"
+    val loop_end = newName "loop_end"
+    val tmp_reg = newName "tmp_reg"
+    val loop_header = [ Mips.LABEL (loop_beg)
+                      , Mips.SUB (tmp_reg, i_reg, size_reg)
+                      , Mips.BGEZ (tmp_reg, loop_end) ]
+    val loop_scan0 =
+        case getElemSize tp of
+          One =>  Mips.LB   (tmp_reg, elem_reg, "0")
+                  :: applyFunArg(farg, [e_reg, tmp_reg], vtable, res_reg, pos)
+                  @ [ Mips.MOVE (e_reg, res_reg) ]
+                  @ [ Mips.ADDI (elem_reg, elem_reg, "1") ]
+        | Four => Mips.LW   (tmp_reg, elem_reg, "0")
+                  :: applyFunArg(farg, [e_reg, tmp_reg], vtable, res_reg, pos)
+                  @ [ Mips.MOVE (e_reg, res_reg) ]
+                  @ [ Mips.ADDI (elem_reg, elem_reg, "4") ]
+    val loop_scan1 =
+        case getElemSize tp of
+            One => [ Mips.SB (res_reg, addr_reg, "0") ]
+          | Four => [ Mips.SW (res_reg, addr_reg, "0") ]
+    val loop_footer =
+        [ Mips.ADDI (addr_reg, addr_reg,
+                     makeConst (elemSizeToInt (getElemSize tp)))
+        , Mips.ADDI (i_reg, i_reg, "1")
+        , Mips.J loop_beg
+        , Mips.LABEL loop_end
+        ]
+in arr_code
+   @ acc_code
+   @ get_size
+   @ dynalloc (size_reg, place, tp)
+   @ init_regs
+   @ loop_header
+   @ loop_scan0
+   @ loop_scan1
+   @ loop_footer
+end	
+\end{lstlisting}
 
+\noindent FIXME PUT AN EXPLANATION OF SCAN HERE.
 
 \subsection{Tests}
+
+FIXME Put in some tests here. I don't know what they are, but they don't need to be complete.
 
 \newpage
 
 \section{Task 3 - Lambda-expressions}
-In the type checker we added a case for anonymous functions in checkFunArg (line 368). As suggested in the comments we construct a FunDec, pass it to checkFunWithVtable and then construct a Lambda from the result. The rest of the case is similar to that of normal function arguments.\\
+In the type checker we added a case for anonymous functions in checkFunArg (line 368). As suggested in the comments we construct a FunDec, pass it to checkFunWithVtable and then construct a Lambda from the result. The rest of the case is similar to that of normal function arguments.
 \begin{lstlisting}
-  | checkFunArg (In.Lambda (ret_type, params, exp, funpos) , vtab, ftab, pos) =
-            let val Out.FunDec (fname, ret_type, args, body, pos) = 
-                    checkFunWithVtable (In.FunDec ("anon", ret_type, params, exp, funpos), vtab, ftab, pos)
-                val arg_types = map (fn (Param (_, ty)) => ty) args
-                in (Out.Lambda (ret_type, args, body, funpos), ret_type, arg_types)
-            end
-\end{lstlisting}
-
-\noindent In the Interpreter we added a case to evalFunArg (line 514) and like in the type checker we construct a function declaration with a bogus name, and then pass it to callFunWithVtable.
-
-\begin{lstlisting}
-    | evalFunArg (Lambda (ret_type, args, body, funpos), vtab, ftab, callpos) =
-            (fn aargs => callFunWithVtable (FunDec ("anon", ret_type, args, body, funpos), aargs, vtab, ftab, callpos), ret_type)
-\end{lstlisting}
-
-\noindent In CodeGen.sml our extra case is, again, similar to that of normal function parameters, with the addition of the code to get the arguments and compile the body of the function (which in the other case is already done) and the extra labels needed for this.
-
-\begin{lstlisting}
-    | applyFunArg (Lambda (ret_type, args, body, funpos), aargs, vtab, place, callpos) : Mips.Prog =
-      let val tmp_reg = newName "tmp_reg"
-          val funlabel = newName "anon_fun"
-          val fun_res = newName "anon_fun_res"
-          val (argcode, vtable_local) = getArgs args vtab minReg
-          val compile_body = compileExp body vtable_local fun_res
-      in  applyRegs(funlabel, aargs, tmp_reg, callpos)
-        @ [Mips.LABEL funlabel]
-        @ argcode
-        @ compile_body
-        @ [Mips.MOVE(place, fun_res)]
+and checkFunArg (In.FunName fname, vtab, ftab, pos) =
+...
+  | checkFunArg (In.Lambda (ret_type, params, exp, funpos),
+                 vtab, ftab, pos) =
+      let val Out.FunDec (fname, ret_type, args, body, pos) = 
+              checkFunWithVtable (In.FunDec ("anon", ret_type, params, exp, funpos),vtab, ftab, pos)
+          val arg_types = map (fn (Param (_, ty)) => ty) args
+          in (Out.Lambda (ret_type, args, body, funpos),
+              ret_type, arg_types)
       end
 \end{lstlisting}
+\noindent The interesting part happens in line 6 where we construct a function declaration with a bogus name and call CheckFunWithVtable, line 7 where we strip the parameter list to get their types and line 8 where we construct an Out.Lambda and return it along with return and argument types.\\
+\\
+\noindent In the Interpreter we added a case to evalFunArg (line 514) and like in the type checker we construct a function declaration with a bogus name, and then pass it to callFunWithVtable.
+\begin{lstlisting}
+and evalFunArg (FunName fid, vtab, ftab, callpos) =
+...
+  | evalFunArg (Lambda (ret_type, args, body, funpos),
+                vtab, ftab, callpos) =
+            (fn aargs =>
+               callFunWithVtable (
+                 FunDec ("anon", ret_type, args, body, funpos),
+                 aargs, vtab, ftab, callpos), ret_type)
+\end{lstlisting}
+\noindent Again the interesting part happens in line 6 where we call callFunWithVtable and pass it a constructed function declaration and the existing vtable.\\
+\\
+\noindent In CodeGen.sml our extra case handles adding the actual arguments to the existing vtable and then inlining the code by compiling it in place with the new modified vtable and moving the resulting value to \textit{place} where it belongs.
+
+\begin{lstlisting}
+and applyFunArg (FunName s, ... ) : Mips.Prog =
+...
+  | applyFunArg (Lambda (ret_type, args, body, funpos),
+                 aargs, vtab, place, callpos) : Mips.Prog =
+     let val fun_res = newName "fun_res" (* for the result *)
+         val arg_names = map (fn Param (n,t) => n) args
+         val zipped_list = zip arg_names aargs
+         val argtab = SymTab.fromList zipped_list
+         val vtab' = SymTab.combine vtab argtab
+         val fun_code = compileExp body vtab' fun_res            
+     in fun_code @ [Mips.MOVE(place, fun_res)]
+     end
+\end{lstlisting}
+\noindent We have added a small helper-function named zip to easily combine the argument names with the passed argument values in order to combine them with the existing vtable. It simply takes a list of formal argument names, matches it up with a list of symbolic registers containing the actual arguments and returns a list of tuples with the pairs.\\
+\\
+\noindent In line 5 we make a new register for the function result. In line 6-9 we make the list of parameters and add them to the existing vtable. In line 10 we compile the actual body of the function and let i place the result in fun\_res and in line 11 we call the body-compilation and then move the result into \textit{place}.
 
 \subsection{Tests}
 
@@ -300,78 +413,89 @@ The test runs as expected.
 \newpage
 
 \section{Task 4 - ConstCopyPropFold}
-In the case of Var we take a look in the vtable and if we find a constant of propegatee we return that, else we return the variable as is.
-
+We have edited two cases to the switch-case of 
 \begin{lstlisting}
- | Var (name, pos) => ( case SymTab.lookup name vtable of
-                       SOME (ConstProp x)        => Constant (x,pos) 
-                     | SOME (VarProp proppedVar) => Var (proppedVar,pos)
-                     | NONE                      => Var (name, pos)
-       )
+fun copyConstPropFoldExp vtable e =
+\end{lstlisting}
+to implement the intended behaviour of constant folding and copy propagation when it comes to variables and values defined in let-clauses.\\
+In the case of Var we take a look in the vtable and if we find a constant of propegatee we return that, else we return the variable as is.\\
+\begin{lstlisting}
+| Var (name, pos) => ( case SymTab.lookup name vtable of
+                      SOME (ConstProp x)        => Constant (x,pos) 
+                    | SOME (VarProp proppedVar) => Var (proppedVar,pos)
+                    | NONE                      => Var (name, pos)
+      )
 \end{lstlisting}
 
-\noindent In the case of Let we call copyConstPropFoldExp on the expression recursively and then add it to our vtable if it's foldable (a constant or variable). At first we simply returned the current vtable if the expression was not foldable, but now we remove any older bindings to the same name to prevent shadowing.
+\noindent In the case of Let we call copyConstPropFoldExp on the expression recursively and then add it to our vtable if it's foldable (can be reduced to a constant or variable). At first we simply returned the current vtable if the expression was not foldable, but now we remove any older bindings to the same name to prevent shadowing.
 
 \begin{lstlisting}
- | Let (Dec (name, e, decpos), body, pos) => 
-   let val e' = copyConstPropFoldExp vtable e
-       val vtable' =  case e' of
-                       Constant (x,_)        => SymTab.bind name (ConstProp x) vtable 
-                     | Var (x,_)             => SymTab.bind name (VarProp x) vtable
-                     | _                     => SymTab.remove name vtable
+| Let (Dec (name, e, decpos), body, pos) => 
+  let val e' = copyConstPropFoldExp vtable e
+      val vtable' =  case e' of
+                      Constant (x,_)        => SymTab.bind name (ConstProp x) vtable 
+                    | Var (x,_)             => SymTab.bind name (VarProp x) vtable
+                    | _                     => SymTab.remove name vtable
 \end{lstlisting}
 
 \subsection{Shadowing}
 \noindent An example of shadowing:
 
 \begin{lstlisting}
-    let x = 5 in
-    let x = f(x) in
-    x * x
+let x = 5 in
+let x = f(x) in
+x * x
 \end{lstlisting}
 
-\noindent In this case x will be bound to our vtable as 5, then x = f(x) (if it cannot be folded) will remove the old binding of x and x*x cannot be folded. If we had not added the call to remove this expression would be folded to the constant 25, as x*x would find the first binding of x.
+\noindent In this case x will be bound to our vtable as 5, then x = f(x) (if it cannot be folded) will remove the old binding of x and x*x cannot be folded. If we had not added the call to remove this expression would be folded to the constant 25, as x*x would find the first binding of x.\\
+\\
+We have not found a solution to the example of shadowing shown in the assignment text.
 
 \subsection{Tests}
+
+FIXME Add the test
 
 \section{Appendices}
 
 \subsection{Task 1 - TypeChecker.sml}\label{app:1type}
 
 \begin{lstlisting}
-    | In.And (e1, e2, pos)
-      => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Bool, e1, e2)
-         in (Bool,
-             Out.And (e1_dec, e2_dec, pos))
-         end
-    | In.Or (e1, e2, pos)
-      => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Bool, e1, e2)
-         in (Bool,
-             Out.Or (e1_dec, e2_dec, pos))
-         end
-    | In.Mult (e1, e2, pos)
-      => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Int, e1, e2)
-         in (Int,
-             Out.Mult (e1_dec, e2_dec, pos))
-         end
-    | In.Divide (e1, e2, pos)
-      => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Int, e1, e2)
-         in (Int,
-             Out.Divide (e1_dec, e2_dec, pos))
-         end
-    | In.Negate (e1, pos)
-      => let val (_, e1_dec) = checkUnOp ftab vtab (pos, Int, e1)
-         in (Int,
-             Out.Negate (e1_dec, pos))
-         end
-    | In.Not (e1, pos)
-      => let val (_, e1_dec) = checkUnOp ftab vtab (pos, Bool, e1)
-         in (Bool,
-             Out.Not (e1_dec, pos))
+and checkExp ftab vtab (exp : In.Exp) = case exp of
+...
+| In.And (e1, e2, pos)
+  => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Bool, e1, e2)
+     in (Bool,
+         Out.And (e1_dec, e2_dec, pos))
+     end
+| In.Or (e1, e2, pos)
+  => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Bool, e1, e2)
+     in (Bool,
+         Out.Or (e1_dec, e2_dec, pos))
+     end
+| In.Mult (e1, e2, pos)
+  => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Int, e1, e2)
+     in (Int,
+         Out.Mult (e1_dec, e2_dec, pos))
+     end
+| In.Divide (e1, e2, pos)
+  => let val (_, e1_dec, e2_dec) = checkBinOp ftab vtab (pos, Int, e1, e2)
+     in (Int,
+         Out.Divide (e1_dec, e2_dec, pos))
+     end
+| In.Negate (e1, pos)
+  => let val (_, e1_dec) = checkUnOp ftab vtab (pos, Int, e1)
+     in (Int,
+         Out.Negate (e1_dec, pos))
+     end
+| In.Not (e1, pos)
+  => let val (_, e1_dec) = checkUnOp ftab vtab (pos, Bool, e1)
+     in (Bool,
+         Out.Not (e1_dec, pos))
 \end{lstlisting}
 
 \subsection{Task 1 - Interpreter.sml}\label{app:1inter}
 \begin{lstlisting}
+fun evalExp ...
   | evalExp ( Not(e, pos), vtab, ftab ) =
         let val res   = evalExp(e, vtab, ftab)
         in  evalUnopBool(not, res, pos)
@@ -404,140 +528,6 @@ In the case of Var we take a look in the vtable and if we find a constant of pro
         end
 \end{lstlisting}
 
-\subsection{Filter - CodeGen.sml}\label{app:scan}
-\begin{lstlisting}
- | Filter (farg, arr_exp, elem_type, pos) =>      
-      
-     let val size_reg = newName "size_reg" (* size of input array *)
-         val arr_reg  = newName "arr_reg" (* address of array *)
-         val elem_reg = newName "elem_reg" (* address of single element *)
-         val res_reg = newName "res_reg" (* vrdi fra input arr og resultat af funktionen *) 
-         val arr_code = compileExp arr_exp vtable arr_reg
-
-         val get_size = [ Mips.LW (size_reg, arr_reg, "0") ]
-
-         val addr_reg = newName "addr_reg" (* address of element in new array *)
-         val i_reg = newName "i_reg"
-         val new_counter = newName "zc"
-         val init_regs = [ Mips.ADDI (addr_reg, place, "4")
-                         , Mips.MOVE (i_reg, "0")
-                         , Mips.ADDI (elem_reg, arr_reg, "4") ]
-
-         val loop_beg = newName "loop_beg"
-         val loop_end = newName "loop_end"
-         val tmp_reg = newName "tmp_reg"
-         val loop_header = [ Mips.LABEL (loop_beg)
-                           , Mips.SUB (tmp_reg, i_reg, size_reg)
-                           , Mips.BGEZ (tmp_reg, loop_end) ]             
-                           
-         val loop_map0 =
-             let val crlabel = newName "cond_result"
-                 val code0 = case getElemSize elem_type of
-                                 One => [ Mips.LB(res_reg, elem_reg, "0") ]
-                              | Four => [ Mips.LW(res_reg, elem_reg, "0") ]
-
-                 val code1 = applyFunArg(farg, [res_reg], vtable, crlabel, pos)
-                 val dontCopyLabel = newName "increment"
-                 
-                 val copycode = case getElemSize elem_type of
-                                 One => [ Mips.SB(res_reg, addr_reg, "0") ]
-                                        @ [ Mips.ADDI(addr_reg, addr_reg, "1"), Mips.ADDI(new_counter,new_counter,"1")]
-                               | Four => [ Mips.SW(res_reg, addr_reg, "0") ]
-                                         @ [ Mips.ADDI(addr_reg, addr_reg, "4") , Mips.ADDI(new_counter,new_counter,"1") ]
-                 val incrementcode = case getElemSize elem_type of
-                                     One => Mips.ADDI (elem_reg, elem_reg, "1")
-                                   | Four => Mips.ADDI (elem_reg, elem_reg, "4")
-             in    
-                 code0 @ code1 @ [Mips.BEQ (crlabel,"0",dontCopyLabel)] @ copycode @ [Mips.LABEL dontCopyLabel,incrementcode]
-             end
-         val write_new_size =
-             [ Mips.SW (new_counter,place,"0") ]
-         val loop_footer =
-             [ 
-              Mips.ADDI (i_reg, i_reg, "1")
-             , Mips.J loop_beg
-             , Mips.LABEL loop_end
-             ]
-     in arr_code
-        @ get_size
-        @ dynalloc (size_reg, place, elem_type)
-        @ init_regs
-        @ loop_header
-        @ loop_map0
-        @ loop_footer
-        @ write_new_size
-     end
-\end{lstlisting}
-\subsection{Scan - CodeGen.sml}\label{app:scan}
-\begin{lstlisting}
- | Scan (farg, acc_exp, arr_exp, tp, pos) =>
-     let val size_reg = newName "size_reg" (* size of input array *)
-         val size_reg = newName "size_reg" (* size of output array *)
-         val arr_reg  = newName "arr_reg" (* address of new array *)
-         val elem_reg = newName "elem_reg" (* address of single element *)
-         val res_reg = newName "res_reg" (* vrdi fra input arr og resultat af funktionen *)
-         val e_reg = newName "e_reg" (* vores udregnede vrdi der skal bruges i nste iteration*)
-         val arr_code = compileExp arr_exp vtable arr_reg    
-         val acc_code = compileExp acc_exp vtable e_reg      (* her udregner vi vores frste e *)
-         
-         val get_size = [ Mips.LW (size_reg, arr_reg, "0"),
-                          Mips.ADDI(size_reg,size_reg,"1") ] (* fordi det nye array er et element lngere. *)
-
-         val addr_reg = newName "addr_reg" (* address of element in new array *)
-         val i_reg = newName "i_reg"
-         val init_regs = let
-                             val first_elem = case getElemSize tp of
-                                 One =>  [ Mips.SB (e_reg, addr_reg, "0"), 
-                                           Mips.ADDI (addr_reg, addr_reg, "1") ]
-                               | Four => [ Mips.SW (e_reg, addr_reg, "0"),
-                                           Mips.ADDI (addr_reg, addr_reg, "4") ]
-                         in
-                         [ Mips.ADDI (addr_reg, place, "4") ]
-                         @ first_elem
-                         @ [ Mips.MOVE (i_reg, "0")
-                         , Mips.ADDI (elem_reg, arr_reg, "4") ]
-                         end
-         val loop_beg = newName "loop_beg"
-         val loop_end = newName "loop_end"
-         val tmp_reg = newName "tmp_reg"
-         val loop_header = [ Mips.LABEL (loop_beg)
-                           , Mips.SUB (tmp_reg, i_reg, size_reg)
-                           , Mips.BGEZ (tmp_reg, loop_end) ]
-         
-         val loop_scan0 =
-             case getElemSize tp of
-                 One =>  Mips.LB   (tmp_reg, elem_reg, "0")
-                         :: applyFunArg(farg, [e_reg, tmp_reg], vtable, res_reg, pos)
-                         @ [ Mips.MOVE (e_reg, res_reg) ]
-                         @ [ Mips.ADDI (elem_reg, elem_reg, "1") ]
-               | Four => Mips.LW   (tmp_reg, elem_reg, "0")
-                         :: applyFunArg(farg, [e_reg, tmp_reg], vtable, res_reg, pos)
-                         @ [ Mips.MOVE (e_reg, res_reg) ]
-                         @ [ Mips.ADDI (elem_reg, elem_reg, "4") ]
-                         
-         val loop_scan1 =
-             case getElemSize tp of
-                 One => [ Mips.SB (res_reg, addr_reg, "0") ]
-               | Four => [ Mips.SW (res_reg, addr_reg, "0") ]
-
-         val loop_footer =
-             [ Mips.ADDI (addr_reg, addr_reg,
-                          makeConst (elemSizeToInt (getElemSize tp)))
-             , Mips.ADDI (i_reg, i_reg, "1")
-             , Mips.J loop_beg
-             , Mips.LABEL loop_end
-             ]
-     in arr_code
-        @ acc_code                       (* compile vores frste e-element *)
-        @ get_size
-        @ dynalloc (size_reg, place, tp)
-        @ init_regs
-        @ loop_header
-        @ loop_scan0
-        @ loop_scan1
-        @ loop_footer
-     end	
-\end{lstlisting}
 
 
 
