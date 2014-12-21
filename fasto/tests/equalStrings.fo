@@ -1,4 +1,4 @@
-fun int main () = 
-    let a = "A" in
-    let b = "A" in
-    if a = b then write ("True") else write ("False")
+fun [char] main () = 
+    let a = 'A' in
+    let b = 'A' in
+    if a == b then write ("True") else write ("False")
